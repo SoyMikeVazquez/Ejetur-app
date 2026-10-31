@@ -22,9 +22,32 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>taxiseguro</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>La aplicación necesita acceder a la cámara para tomar fotos de los documentos del vehículo y el conductor.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Necesitamos tu ubicación para mostrar viajes cercanos y calcular rutas de taxi.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Necesitamos tu ubicación para mostrar viajes cercanos y calcular rutas de taxi.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Necesitamos tu ubicación para mostrar viajes cercanos y calcular rutas de taxi.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>La aplicación necesita acceder a la galería para subir los documentos del vehículo y el conductor.</string>
+	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
@@ -49,6 +72,11 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>location</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -66,33 +94,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Necesitamos tu ubicación para mostrar viajes cercanos y calcular rutas de taxi.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Necesitamos tu ubicación para mostrar viajes cercanos y calcular rutas de taxi.</string>
-	<key>NSLocationUsageDescription</key>
-	<string>Necesitamos tu ubicación para mostrar viajes cercanos y calcular rutas de taxi.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>La aplicación necesita acceder a la galería para subir los documentos del vehículo y el conductor.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>La aplicación necesita acceder a la cámara para tomar fotos de los documentos del vehículo y el conductor.</string>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>taxiseguro</string>
-			</array>
-		</dict>
-	</array>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>location</string>
-	</array>
-	<key>NSSupportsLiveActivities</key>
-	<true/>
 </dict>
 </plist>

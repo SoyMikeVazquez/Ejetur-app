@@ -756,4 +756,71 @@ class AdminService {
       throw e;
     }
   }
+
+  // ==============================================
+  // USUARIOS REFERIDOS POR CONDUCTOR
+  // ==============================================
+
+  Future<List<Map<String, dynamic>>> getDriverReferrals({
+    String? driverPhone,
+    required String driverName,
+    String? driverFullName,
+    String? driverUserId,
+    String? driverId,
+  }) async {
+    try {
+      final candidateNames = <String>{};
+      final cleanName = driverName.trim().toLowerCase();
+      if (cleanName.isNotEmpty) candidateNames.add(cleanName);
+      if (driverFullName != null && driverFullName.trim().isNotEmpty) {
+        candidateNames.add(driverFullName.trim().toLowerCase());
+      }
+      if (driverUserId != null && driverUserId.trim().isNotEmpty) {
+        candidateNames.add(driverUserId.trim().toLowerCase());
+      }
+      if (driverId != null && driverId.trim().isNotEmpty) {
+        candidateNames.add(driverId.trim().toLowerCase());
+      }
+
+      final cleanDriverPhone = (driverPhone ?? '').replaceAll(RegExp(r'\D'), '');
+      final candidatePhones = <String>{};
+      if (cleanDriverPhone.isNotEmpty) {
+        candidatePhones.add(cleanDriverPhone);
+        if (cleanDriverPhone.startsWith('52') && cleanDriverPhone.length > 10) {
+          candidatePhones.add(cleanDriverPhone.substring(2));
+        }
+        if (cleanDriverPhone.length == 10) {
+          candidatePhones.add('52$cleanDriverPhone');
+        }
+      }
+
+      final res = await _supabase
+          .from('users')
+          .select('id, user_id, nombre, correo, telefono, imagen_perfil, fotodeperfil, referido, time_referido, usuario_activado, comision_referido, created_at')
+          .not('referido', 'is', null)
+          .order('time_referido', ascending: false);
+
+      final list = List<Map<String, dynamic>>.from(res as List);
+      final filtered = list.where((u) {
+        final ref = (u['referido'] ?? '').toString().trim().toLowerCase();
+        if (ref.isEmpty) return false;
+        final cleanRefDigits = ref.replaceAll(RegExp(r'\D'), '');
+
+        // 1. Coincidencia por teléfono del conductor
+        if (candidatePhones.isNotEmpty && cleanRefDigits.isNotEmpty) {
+          if (candidatePhones.any((p) => cleanRefDigits == p || cleanRefDigits.endsWith(p) || p.endsWith(cleanRefDigits))) {
+            return true;
+          }
+        }
+
+        // 2. Coincidencia por nombre / ID para compatibilidad
+        return candidateNames.any((name) => ref == name || ref.contains(name) || name.contains(ref));
+      }).toList();
+
+      return filtered;
+    } catch (e) {
+      print('Error al obtener referidos del conductor: $e');
+      return [];
+    }
+  }
 }

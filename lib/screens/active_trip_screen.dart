@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -41,6 +43,20 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
     _listenToTripUpdates();
     _loadPassengerInfo();
     _startWaitTimerIfNeeded();
+    _ensureTripCodeIfArrived();
+  }
+
+  void _ensureTripCodeIfArrived() {
+    if (_currentTrip.status == 'arrived' && _currentTrip.codigo == null && _currentTrip.id != null && _currentTrip.id != 'simulated_trip_123') {
+      final pinCode = 10000 + Random().nextInt(90000);
+      _tripService.updateTripStatus(_currentTrip.id!, 'arrived', codigo: pinCode).then((success) {
+        if (success && mounted) {
+          setState(() {
+            _currentTrip = _currentTrip.copyWith(codigo: pinCode);
+          });
+        }
+      });
+    }
   }
 
   void _startWaitTimerIfNeeded() {
@@ -232,9 +248,18 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
     if (_currentTrip.id == null) return;
     
     setState(() => _isLoading = true);
+    int? codeToUse = _currentTrip.codigo;
+    if (newStatus == 'arrived' && codeToUse == null) {
+      codeToUse = 10000 + Random().nextInt(90000);
+    }
+
     bool success = true;
     if (_currentTrip.id != 'simulated_trip_123') {
-      success = await _tripService.updateTripStatus(_currentTrip.id!, newStatus);
+      success = await _tripService.updateTripStatus(
+        _currentTrip.id!,
+        newStatus,
+        codigo: codeToUse,
+      );
     }
     
     if (success) {
@@ -247,24 +272,10 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
       }
 
       setState(() {
-        _currentTrip = Trip(
-          id: _currentTrip.id,
-          userId: _currentTrip.userId,
-          driverId: _currentTrip.driverId,
-          originAddress: _currentTrip.originAddress,
-          destinationAddress: _currentTrip.destinationAddress,
-          originLat: _currentTrip.originLat,
-          originLng: _currentTrip.originLng,
-          destinationLat: _currentTrip.destinationLat,
-          destinationLng: _currentTrip.destinationLng,
-          postalCode: _currentTrip.postalCode,
-          delegation: _currentTrip.delegation,
+        _currentTrip = _currentTrip.copyWith(
           status: newStatus,
-          fare: _currentTrip.fare,
-          distanceKm: _currentTrip.distanceKm,
-          createdAt: _currentTrip.createdAt,
           arrivedAt: newStatus == 'arrived' ? DateTime.now() : _currentTrip.arrivedAt,
-          completedAt: _currentTrip.completedAt,
+          codigo: codeToUse ?? _currentTrip.codigo,
         );
       });
       _startWaitTimerIfNeeded();
@@ -276,6 +287,282 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
       }
     }
     setState(() => _isLoading = false);
+  }
+
+  void _promptTripPin() {
+    if (_currentTrip.codigo == null) {
+      // Si por alguna razón no tiene código registrado, permite iniciar directamente
+      _updateStatus('in_progress');
+      return;
+    }
+
+    final String expectedPin = _currentTrip.codigo.toString().padLeft(5, '0');
+    final TextEditingController pinController = TextEditingController();
+    final FocusNode pinFocusNode = FocusNode();
+    String errorMessage = '';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final enteredPin = pinController.text;
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x1F000000),
+                    blurRadius: 15,
+                    offset: Offset(0, -4),
+                  ),
+                ],
+              ),
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                top: 20,
+                left: 24,
+                right: 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 44,
+                      height: 5,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFEBF3FF),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.shield_outlined,
+                        size: 30,
+                        color: Color(0xFF007AFF),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text(
+                    'Ingresa el PIN de seguridad',
+                    style: TextStyle(
+                      fontFamily: 'Google Sans',
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Pídele al pasajero el código de 5 dígitos que aparece en su aplicación para iniciar el viaje.',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  // Cajitas de PIN interactivas
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => pinFocusNode.requestFocus(),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(5, (index) {
+                        final hasDigit = index < enteredPin.length;
+                        final isCurrent = index == enteredPin.length;
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 5),
+                          width: 48,
+                          height: 56,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: hasDigit ? const Color(0xFF007AFF) : const Color(0xFFF3F4F6),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isCurrent
+                                  ? const Color(0xFF007AFF)
+                                  : (hasDigit ? const Color(0xFF007AFF) : const Color(0xFFE5E7EB)),
+                              width: isCurrent ? 2 : 1,
+                            ),
+                          ),
+                          child: Text(
+                            hasDigit ? enteredPin[index] : '',
+                            style: TextStyle(
+                              fontFamily: 'Google Sans',
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: hasDigit ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Campo de texto invisible para teclear con teclado numérico
+                  Opacity(
+                    opacity: 0.0,
+                    child: SizedBox(
+                      height: 1,
+                      child: TextField(
+                        controller: pinController,
+                        focusNode: pinFocusNode,
+                        autofocus: true,
+                        keyboardType: TextInputType.number,
+                        maxLength: 5,
+                        onChanged: (val) {
+                          setModalState(() {
+                            errorMessage = '';
+                          });
+                          if (val.length == 5) {
+                            if (val == expectedPin) {
+                              Navigator.pop(ctx);
+                              _updateStatus('in_progress');
+                            } else {
+                              setModalState(() {
+                                errorMessage = 'PIN incorrecto. Por favor verifica con el pasajero.';
+                              });
+                            }
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  if (errorMessage.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Text(
+                        errorMessage,
+                        style: const TextStyle(
+                          color: Colors.redAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                  if (kDebugMode || _currentTrip.id == 'simulated_trip_123') ...[
+                    const SizedBox(height: 8),
+                    Center(
+                      child: Text(
+                        'PIN para pruebas: $expectedPin',
+                        style: const TextStyle(fontSize: 12, color: Colors.grey, fontStyle: FontStyle.italic),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 20),
+                  // Botón Iniciar
+                  SizedBox(
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: enteredPin.length == 5
+                          ? () {
+                              if (enteredPin == expectedPin) {
+                                Navigator.pop(ctx);
+                                _updateStatus('in_progress');
+                              } else {
+                                setModalState(() {
+                                  errorMessage = 'PIN incorrecto. Por favor verifica con el pasajero.';
+                                });
+                              }
+                            }
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFC7FF2E), // Electric yellow/green
+                        foregroundColor: Colors.black,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+                        disabledBackgroundColor: Colors.grey[200],
+                        disabledForegroundColor: Colors.grey[400],
+                      ),
+                      child: const Text(
+                        'Verificar e Iniciar Viaje',
+                        style: TextStyle(
+                          fontFamily: 'Google Sans',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // Botón omitir con advertencia
+                  TextButton(
+                    onPressed: () {
+                      _showBypassPinConfirmation(ctx);
+                    },
+                    child: const Text(
+                      'Iniciar viaje sin PIN',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        color: Colors.black45,
+                        fontSize: 13,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showBypassPinConfirmation(BuildContext parentCtx) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          '¿Iniciar sin código?',
+          style: TextStyle(fontFamily: 'Google Sans', fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Inicia sin PIN únicamente si el pasajero no tiene acceso a su teléfono o la app se encuentra temporalmente inaccesible.',
+          style: TextStyle(fontFamily: 'Inter', fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Volver', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx); // Cierra diálogo
+              Navigator.pop(parentCtx); // Cierra bottom sheet del PIN
+              _updateStatus('in_progress');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+            child: const Text('Iniciar de todos modos'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showCancelDialog() {
@@ -665,7 +952,7 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
         title = 'Esperando Pasajero';
         actionText = 'Iniciar viaje';
         actionIcon = Icons.play_arrow;
-        actionCallback = () => _updateStatus('in_progress');
+        actionCallback = _promptTripPin;
         break;
       case 'in_progress':
         title = 'Navegando al Destino';

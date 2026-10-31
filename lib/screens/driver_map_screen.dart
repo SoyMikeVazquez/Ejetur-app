@@ -31,7 +31,7 @@ class _DriverMapScreenState extends State<DriverMapScreen> with WidgetsBindingOb
   Trip? _activeTrip;
   
   // Ubicación inicial por defecto (se actualizará con el GPS)
-  LatLng _currentLocation = const LatLng(19.4326, -99.1332);
+  LatLng _currentLocation = const LatLng(16.7569, -93.1292); // Tuxtla Gutiérrez, Chiapas
   bool _isLoadingLocation = true;
   bool _locationPermissionGranted = false;
   
@@ -381,23 +381,9 @@ class _DriverMapScreenState extends State<DriverMapScreen> with WidgetsBindingOb
           ),
         );
         if (success) {
-          final acceptedTrip = Trip(
-            id: trip.id,
-            userId: trip.userId,
+          final acceptedTrip = trip.copyWith(
             driverId: _driverId,
-            originAddress: trip.originAddress,
-            destinationAddress: trip.destinationAddress,
-            originLat: trip.originLat,
-            originLng: trip.originLng,
-            destinationLat: trip.destinationLat,
-            destinationLng: trip.destinationLng,
-            postalCode: trip.postalCode,
-            delegation: trip.delegation,
             status: 'accepted',
-            fare: trip.fare,
-            distanceKm: trip.distanceKm,
-            createdAt: trip.createdAt,
-            paymentMethod: trip.paymentMethod,
           );
           
           BackgroundServiceHelper.startDriverTrip('Nuevo Viaje Aceptado', 'Dirígete al punto de recogida');

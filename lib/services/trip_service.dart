@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/trip.dart';
+import 'package:latlong2/latlong.dart';
 import 'rating_service.dart';
 import 'resend_service.dart';
+import 'geofence_service.dart';
 
 class TripService {
   final SupabaseClient _client = Supabase.instance.client;
@@ -61,6 +64,18 @@ class TripService {
 
   /// Crear un nuevo viaje (Intento 1: estado pending)
   Future<Trip?> createTrip(Trip trip) async {
+    // 0. Validar geofence (solo Chiapas a menos que tenga permiso especial)
+    if (trip.originLat != null && trip.originLng != null) {
+      final canRequest = await GeofenceService.canRequestTrip(
+        userId: trip.userId,
+        origin: LatLng(trip.originLat!, trip.originLng!),
+      );
+      if (!canRequest) {
+        print('Creación de viaje bloqueada: El origen está fuera del estado de Chiapas y el usuario no tiene permiso especial.');
+        return null;
+      }
+    }
+
     // 1. Validar que el usuario no tenga ya un viaje activo
     final activeTrip = await getActiveTripForPassenger(trip.userId);
     if (activeTrip != null) {
@@ -352,7 +367,7 @@ class TripService {
   }
 
   /// Actualizar el estado del viaje (ej: arrived, in_progress)
-  Future<bool> updateTripStatus(String tripId, String newStatus) async {
+  Future<bool> updateTripStatus(String tripId, String newStatus, {int? codigo}) async {
     try {
       final updateData = <String, dynamic>{
         'status': newStatus,
@@ -360,6 +375,11 @@ class TripService {
       
       if (newStatus == 'arrived') {
         updateData['arrived_at'] = DateTime.now().toUtc().toIso8601String();
+        // Generar código de 5 dígitos para verificación (estilo Uber) si no viene provisto
+        final pinCode = codigo ?? (10000 + Random().nextInt(90000));
+        updateData['codigo'] = pinCode;
+      } else if (codigo != null) {
+        updateData['codigo'] = codigo;
       }
 
       await _client.from('trips').update(updateData).eq('id', tripId);
@@ -423,7 +443,29 @@ class TripService {
               passengerPhone = userRes['telefono'] as String?;
               passengerName = userRes['nombre'] as String?;
             }
-          } catch (_) {}
+
+            final bool wasAlreadyActivated = userRes != null && userRes['usuario_activado'] == true;
+            final bool hasReferido = userRes != null &&
+                userRes['referido'] != null &&
+                userRes['referido'].toString().trim().isNotEmpty;
+
+            final Map<String, dynamic> updateUserData = {
+              'usuario_activado': true,
+            };
+
+            // Regla del Sistema de Referidos:
+            // Al completar su PRIMER viaje, tomamos el 20% del monto a pagar (fare)
+            // y lo guardamos en la columna comision_referido de la tabla users.
+            if (hasReferido && !wasAlreadyActivated) {
+              final double comisionReferido = fare * 0.20;
+              updateUserData['comision_referido'] = comisionReferido;
+              print('Sistema de Referidos: Comisión de \$${comisionReferido.toStringAsFixed(2)} asignada por 1er viaje de usuario $userId (Monto: \$$fare) para el conductor: ${userRes['referido']}');
+            }
+
+            await _client.from('users').update(updateUserData).eq('user_id', userId);
+          } catch (activateError) {
+            print('Error activando usuario o calculando comisión de referido: $activateError');
+          }
         }
 
         final double comisionApp = fare * 0.20; // 20% TaxiSeguro

@@ -25,12 +25,27 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
 
   String _tripFilter = 'todos'; // 'todos', 'completed', 'cancelled'
 
+  // Referidos
+  List<Map<String, dynamic>> _referrals = [];
+  bool _isLoadingReferrals = false;
+  late DateTimeRange _selectedDateRange;
+  String _datePreset = '30d'; // '30d', '7d', 'mes', 'todo', 'custom'
+  String _referralStatusFilter = 'todos'; // 'todos', 'activos', 'pendientes'
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _detailData = DriverFullDetailData.empty(widget.driver);
+
+    final now = DateTime.now();
+    _selectedDateRange = DateTimeRange(
+      start: DateTime(now.year, now.month, now.day).subtract(const Duration(days: 30)),
+      end: DateTime(now.year, now.month, now.day, 23, 59, 59),
+    );
+
     _loadDriverDetails();
+    _loadReferrals();
   }
 
   @override
@@ -55,6 +70,38 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
         _detailData = data;
         _isLoading = false;
       });
+      _loadReferrals();
+    }
+  }
+
+  Future<void> _loadReferrals() async {
+    setState(() => _isLoadingReferrals = true);
+    try {
+      final driver = _detailData.driver.isNotEmpty ? _detailData.driver : widget.driver;
+      final driverPhone = (driver['telefono'] ?? widget.driver['telefono'] ?? '').toString();
+      final driverName = (driver['nombre'] ?? widget.driver['nombre'] ?? '').toString();
+      final driverFullName = (driver['nombre_completo'] ?? widget.driver['nombre_completo'] ?? '').toString();
+      final driverUserId = (driver['user_id'] ?? widget.driver['user_id'] ?? '').toString();
+      final driverId = (driver['id'] ?? widget.driver['id'] ?? '').toString();
+
+      final list = await _adminService.getDriverReferrals(
+        driverPhone: driverPhone,
+        driverName: driverName,
+        driverFullName: driverFullName,
+        driverUserId: driverUserId,
+        driverId: driverId,
+      );
+
+      if (mounted) {
+        setState(() {
+          _referrals = list;
+          _isLoadingReferrals = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingReferrals = false);
+      }
     }
   }
 
@@ -304,6 +351,8 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
         ],
         bottom: TabBar(
           controller: _tabController,
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
           labelColor: Colors.black,
           unselectedLabelColor: Colors.grey,
           indicatorColor: const Color(0xFFC7FF2E),
@@ -313,6 +362,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
             Tab(text: 'Info Personal'),
             Tab(text: 'Finanzas'),
             Tab(text: 'Historial de Viajes'),
+            Tab(text: 'Referidos'),
           ],
         ),
       ),
@@ -332,6 +382,9 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
 
                   // TAB 3: HISTORIAL DE VIAJES REAL
                   _buildTripHistoryTab(),
+
+                  // TAB 4: USUARIOS REFERIDOS
+                  _buildReferralsTab(),
                 ],
               ),
             ),
@@ -1267,6 +1320,944 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
             )
           else
             const Text('No subido', style: TextStyle(color: Colors.grey, fontSize: 11)),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // TAB 4: USUARIOS REFERIDOS
+  // ==========================================
+
+  Future<void> _selectCustomDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      initialDateRange: _selectedDateRange,
+      firstDate: DateTime(2023),
+      lastDate: DateTime.now().add(const Duration(days: 1)),
+      helpText: 'SELECCIONA RANGO DE FECHAS',
+      cancelText: 'CANCELAR',
+      confirmText: 'APLICAR',
+      saveText: 'APLICAR',
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Colors.black,
+              onPrimary: Color(0xFFC7FF2E),
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+            dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDateRange = DateTimeRange(
+          start: DateTime(picked.start.year, picked.start.month, picked.start.day),
+          end: DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59),
+        );
+        _datePreset = 'custom';
+      });
+    }
+  }
+
+  void _setDatePreset(String preset) {
+    final now = DateTime.now();
+    setState(() {
+      _datePreset = preset;
+      if (preset == '30d') {
+        _selectedDateRange = DateTimeRange(
+          start: DateTime(now.year, now.month, now.day).subtract(const Duration(days: 30)),
+          end: DateTime(now.year, now.month, now.day, 23, 59, 59),
+        );
+      } else if (preset == '7d') {
+        _selectedDateRange = DateTimeRange(
+          start: DateTime(now.year, now.month, now.day).subtract(const Duration(days: 7)),
+          end: DateTime(now.year, now.month, now.day, 23, 59, 59),
+        );
+      } else if (preset == 'mes') {
+        _selectedDateRange = DateTimeRange(
+          start: DateTime(now.year, now.month, 1),
+          end: DateTime(now.year, now.month, now.day, 23, 59, 59),
+        );
+      }
+    });
+  }
+
+  String _formatDateShort(DateTime d) {
+    final months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return '${d.day} ${months[d.month - 1]} ${d.year}';
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
+    final uri = Uri.parse('tel:$cleanPhone');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  Future<void> _sendWhatsApp(String phoneNumber) async {
+    final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+    final uri = Uri.parse('https://wa.me/$cleanPhone');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Widget _buildReferralsTab() {
+    if (_isLoadingReferrals) {
+      return const Center(child: CircularProgressIndicator(color: Colors.black));
+    }
+
+    // Filtrar por rango de fechas
+    final filteredByDate = _referrals.where((u) {
+      if (_datePreset == 'todo') return true;
+      final rawTime = u['time_referido'] ?? u['created_at'];
+      if (rawTime == null) return false;
+      final dt = DateTime.tryParse(rawTime.toString())?.toLocal();
+      if (dt == null) return false;
+
+      return dt.isAfter(_selectedDateRange.start.subtract(const Duration(seconds: 1))) &&
+          dt.isBefore(_selectedDateRange.end.add(const Duration(seconds: 1)));
+    }).toList();
+
+    final int totalInPeriod = filteredByDate.length;
+    final int activeInPeriod = filteredByDate.where((u) => u['usuario_activado'] == true).length;
+    final int pendingInPeriod = totalInPeriod - activeInPeriod;
+
+    double totalComisionesPeriodo = 0.0;
+    for (var u in filteredByDate) {
+      if (u['usuario_activado'] == true) {
+        final com = (u['comision_referido'] as num?)?.toDouble() ?? 0.0;
+        totalComisionesPeriodo += com;
+      }
+    }
+
+    // Filtrar por estatus
+    List<Map<String, dynamic>> displayedReferrals;
+    if (_referralStatusFilter == 'activos') {
+      displayedReferrals = filteredByDate.where((u) => u['usuario_activado'] == true).toList();
+    } else if (_referralStatusFilter == 'pendientes') {
+      displayedReferrals = filteredByDate.where((u) => u['usuario_activado'] != true).toList();
+    } else {
+      displayedReferrals = filteredByDate;
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadReferrals,
+      color: Colors.black,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // 0. BANNER DESTACADO: TOTAL DE COMISIONES POR REFERIDOS
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1B1B1B), Color(0xFF2C2C2C)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 15,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFC7FF2E).withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFFC7FF2E), width: 1.5),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.monetization_on, color: Color(0xFFC7FF2E), size: 28),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Text(
+                            'COMISIÓN POR REFERIDOS',
+                            style: TextStyle(
+                              fontFamily: 'Google Sans',
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.8,
+                              color: Color(0xFFC7FF2E),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text(
+                              '20%',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatCurrency(totalComisionesPeriodo),
+                        style: const TextStyle(
+                          fontFamily: 'Google Sans',
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        activeInPeriod == 1
+                            ? '1 usuario activo generó comisión en este período'
+                            : '$activeInPeriod usuarios activos generaron comisión en este período',
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 11.5,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          // 1. TARJETAS DE MÉTRICAS RÁPIDAS
+          Row(
+            children: [
+              Expanded(
+                child: _buildReferralMetricCard(
+                  title: 'Total Referidos',
+                  value: totalInPeriod.toString(),
+                  icon: Icons.people_alt_outlined,
+                  color: Colors.black87,
+                  accentColor: const Color(0xFFC7FF2E),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildReferralMetricCard(
+                  title: 'Activos (1er viaje)',
+                  value: activeInPeriod.toString(),
+                  icon: Icons.check_circle_outline,
+                  color: const Color(0xFF1B5E20),
+                  accentColor: const Color(0xFFA5D6A7),
+                  isPositive: true,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildReferralMetricCard(
+                  title: 'Pendientes',
+                  value: pendingInPeriod.toString(),
+                  icon: Icons.hourglass_top_outlined,
+                  color: Colors.orange.shade900,
+                  accentColor: Colors.orange.shade100,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // 2. FILTROS DE TIEMPO PERSONALIZABLES
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Período de Referidos',
+                      style: TextStyle(
+                        fontFamily: 'Google Sans',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    if (_datePreset == 'custom')
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFC7FF2E).withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'Personalizado',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // Botones rápidos de preajuste
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildDatePresetChip('Últimos 30 días', '30d'),
+                      const SizedBox(width: 6),
+                      _buildDatePresetChip('Últimos 7 días', '7d'),
+                      const SizedBox(width: 6),
+                      _buildDatePresetChip('Este mes', 'mes'),
+                      const SizedBox(width: 6),
+                      _buildDatePresetChip('Todo el historial', 'todo'),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Selector con fecha editable
+                InkWell(
+                  onTap: _selectCustomDateRange,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF7F8FA),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_today_outlined, size: 16, color: Colors.black87),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _datePreset == 'todo'
+                                ? 'Mostrando todo el historial de referidos'
+                                : '${_formatDateShort(_selectedDateRange.start)} — ${_formatDateShort(_selectedDateRange.end)}',
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.edit_calendar_outlined, size: 13, color: Color(0xFFC7FF2E)),
+                              SizedBox(width: 4),
+                              Text(
+                                'Modificar',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // 3. SELECTOR DE ESTATUS (TODOS, ACTIVOS, PENDIENTES)
+          Row(
+            children: [
+              _buildReferralStatusChip('Todos ($totalInPeriod)', 'todos'),
+              const SizedBox(width: 8),
+              _buildReferralStatusChip('Activos ($activeInPeriod)', 'activos'),
+              const SizedBox(width: 8),
+              _buildReferralStatusChip('Pendientes ($pendingInPeriod)', 'pendientes'),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // 4. LISTADO DE USUARIOS REFERIDOS
+          if (displayedReferrals.isEmpty)
+            Container(
+              margin: const EdgeInsets.only(top: 24),
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                children: [
+                  Icon(Icons.people_outline, size: 54, color: Colors.grey.shade400),
+                  const SizedBox(height: 12),
+                  Text(
+                    _referrals.isEmpty
+                        ? 'Este conductor aún no tiene usuarios referidos'
+                        : 'No hay usuarios referidos en este rango de fechas',
+                    style: const TextStyle(
+                      fontFamily: 'Google Sans',
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _referrals.isEmpty
+                        ? 'Cuando nuevos pasajeros elijan a este conductor en su registro, aparecerán aquí.'
+                        : 'Prueba cambiando las fechas o seleccionando "Todo el historial".',
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 12,
+                      color: Colors.black54,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (_referrals.isNotEmpty && _datePreset != 'todo') ...[
+                    const SizedBox(height: 14),
+                    TextButton.icon(
+                      onPressed: () => _setDatePreset('todo'),
+                      icon: const Icon(Icons.all_inclusive, size: 16, color: Colors.black),
+                      label: const Text(
+                        'Ver todo el historial',
+                        style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold, color: Colors.black),
+                      ),
+                      style: TextButton.styleFrom(
+                        backgroundColor: const Color(0xFFC7FF2E),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            )
+          else
+            ...displayedReferrals.map((user) => _buildReferralCard(user)),
+
+          const SizedBox(height: 30),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReferralMetricCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+    required Color accentColor,
+    bool isPositive = false,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.35),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 16, color: color),
+              ),
+              if (isPositive)
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF00E676),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            style: TextStyle(
+              fontFamily: 'Google Sans',
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Colors.black54,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDatePresetChip(String label, String presetKey) {
+    final isSelected = _datePreset == presetKey;
+    return InkWell(
+      onTap: () => _setDatePreset(presetKey),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.black : const Color(0xFFF0F0F0),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            color: isSelected ? const Color(0xFFC7FF2E) : Colors.black87,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReferralStatusChip(String label, String filterKey) {
+    final isSelected = _referralStatusFilter == filterKey;
+    return InkWell(
+      onTap: () => setState(() => _referralStatusFilter = filterKey),
+      borderRadius: BorderRadius.circular(14),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.black : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? Colors.black : Colors.grey.shade300,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Google Sans',
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: isSelected ? const Color(0xFFC7FF2E) : Colors.black87,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReferralCard(Map<String, dynamic> user) {
+    final String name = (user['nombre'] ?? 'Usuario').toString().trim();
+    final String email = (user['correo'] ?? 'Sin correo').toString().trim();
+    final String phone = (user['telefono'] ?? '').toString().trim();
+    final String? photoUrl = (user['imagen_perfil'] ?? user['fotodeperfil']) as String?;
+    final bool isUserActive = user['usuario_activado'] == true;
+    final String? referralTime = (user['time_referido'] ?? user['created_at'])?.toString();
+
+    final initials = name.isNotEmpty
+        ? name.split(' ').where((w) => w.isNotEmpty).take(2).map((w) => w[0].toUpperCase()).join()
+        : 'U';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isUserActive ? const Color(0xFFC7FF2E).withValues(alpha: 0.5) : Colors.grey.shade200,
+          width: isUserActive ? 1.5 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // CABECERA: FOTO, NOMBRE, DATOS Y BADGE ACTIVO/PENDIENTE
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Avatar
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isUserActive ? const Color(0xFFC7FF2E).withValues(alpha: 0.25) : Colors.grey.shade100,
+                  border: Border.all(
+                    color: isUserActive ? const Color(0xFF2E7D32) : Colors.grey.shade300,
+                    width: 1.5,
+                  ),
+                ),
+                child: ClipOval(
+                  child: photoUrl != null && photoUrl.isNotEmpty
+                      ? Image.network(
+                          photoUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (ctx, err, stack) => Center(
+                            child: Text(
+                              initials,
+                              style: const TextStyle(fontFamily: 'Google Sans', fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            initials,
+                            style: const TextStyle(fontFamily: 'Google Sans', fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Datos del usuario
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontFamily: 'Google Sans',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    if (email.isNotEmpty && email != 'Sin correo')
+                      Row(
+                        children: [
+                          Icon(Icons.mail_outline, size: 12, color: Colors.grey.shade600),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              email,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 11,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    if (phone.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Row(
+                          children: [
+                            Icon(Icons.phone_outlined, size: 12, color: Colors.grey.shade600),
+                            const SizedBox(width: 4),
+                            Text(
+                              phone,
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 11,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+
+              // BADGE DE ESTADO ACTIVO / PENDIENTE
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: isUserActive ? const Color(0xFFE8F5E9) : const Color(0xFFFFF8E1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isUserActive ? Colors.green.shade300 : Colors.amber.shade300,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isUserActive ? Icons.check_circle : Icons.hourglass_top,
+                      size: 13,
+                      color: isUserActive ? const Color(0xFF2E7D32) : Colors.amber.shade900,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      isUserActive ? 'ACTIVO' : 'PENDIENTE',
+                      style: TextStyle(
+                        fontFamily: 'Google Sans',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10.5,
+                        letterSpacing: 0.3,
+                        color: isUserActive ? const Color(0xFF1B5E20) : Colors.amber.shade900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // SECCIÓN DE COMISIÓN (20% del 1er viaje)
+          if (isUserActive)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F8E9),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFA5D6A7)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF2E7D32),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.attach_money, size: 14, color: Colors.white),
+                      ),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Comisión Ganada (20%)',
+                            style: TextStyle(
+                              fontFamily: 'Google Sans',
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1B5E20),
+                            ),
+                          ),
+                          Text(
+                            'Por el 1er viaje de este usuario',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 10.5,
+                              color: Colors.green.shade800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Text(
+                    _formatCurrency((user['comision_referido'] as num?)?.toDouble() ?? 0.0),
+                    style: const TextStyle(
+                      fontFamily: 'Google Sans',
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1B5E20),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFDE7),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFFFF59D)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.monetization_on_outlined, size: 16, color: Colors.amber.shade900),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Comisión pendiente: El conductor ganará el 20% cuando este usuario finalice su primer viaje.',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 11,
+                        color: Colors.amber.shade900,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+          const SizedBox(height: 10),
+
+          // PIE DE TARJETA: FECHA DE REFERIDO Y ACCIONES
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Fecha
+              Row(
+                children: [
+                  Icon(Icons.access_time, size: 13, color: Colors.grey.shade500),
+                  const SizedBox(width: 5),
+                  Text(
+                    referralTime != null ? _formatDate(referralTime) : 'Fecha no registrada',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 11,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+
+              // Botones de llamada / whatsapp si tiene teléfono
+              if (phone.isNotEmpty)
+                Row(
+                  children: [
+                    InkWell(
+                      onTap: () => _makePhoneCall(phone),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF3F4F6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.call, size: 12, color: Colors.black87),
+                            SizedBox(width: 4),
+                            Text(
+                              'Llamar',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    InkWell(
+                      onTap: () => _sendWhatsApp(phone),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8F5E9),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.chat_bubble_outline, size: 12, color: Color(0xFF2E7D32)),
+                            SizedBox(width: 4),
+                            Text(
+                              'WhatsApp',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1B5E20),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
         ],
       ),
     );

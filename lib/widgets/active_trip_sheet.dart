@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/trip.dart';
 import '../services/driver_profile_service.dart';
 import '../services/trip_service.dart';
@@ -408,6 +409,11 @@ class _ActiveTripSheetState extends State<ActiveTripSheet> {
               ],
             ),
 
+            if (widget.trip?.codigo != null || widget.trip?.status == 'arrived') ...[
+              const SizedBox(height: 12),
+              _buildUberPinBanner(widget.trip?.codigo),
+            ],
+
             const SizedBox(height: 16),
             const Divider(height: 1),
             
@@ -592,6 +598,106 @@ class _ActiveTripSheetState extends State<ActiveTripSheet> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildUberPinBanner(int? pinCode) {
+    final pinString = pinCode?.toString().padLeft(5, '0');
+    final digits = pinString?.split('') ?? ['•', '•', '•', '•', '•'];
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEBF3FF), // Fondo celeste pastel idéntico a Uber
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFD6E6FF), width: 1),
+      ),
+      child: Row(
+        children: [
+          const Expanded(
+            child: Text(
+              'PIN de este viaje',
+              style: TextStyle(
+                fontFamily: 'Google Sans',
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+          ),
+          // Dígitos individuales en cajitas azules redondeadas estilo Uber
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: digits.map((digit) {
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                width: 28,
+                height: 32,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF007AFF), // Azul Uber vibrante
+                  borderRadius: BorderRadius.circular(7),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF007AFF).withValues(alpha: 0.28),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  digit,
+                  style: const TextStyle(
+                    fontFamily: 'Google Sans',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(width: 10),
+          // Botón de altavoz / copiar PIN
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                if (pinString == null) return;
+                Clipboard.setData(ClipboardData(text: pinString));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        const Icon(Icons.check_circle, color: Colors.white, size: 18),
+                        const SizedBox(width: 8),
+                        Text('PIN copiado al portapapeles: $pinString'),
+                      ],
+                    ),
+                    backgroundColor: const Color(0xFF007AFF),
+                    duration: const Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.volume_up_rounded,
+                  color: Color(0xFF007AFF),
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

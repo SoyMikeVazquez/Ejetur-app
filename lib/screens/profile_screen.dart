@@ -134,7 +134,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       
       final String publicUrl = _supabase.storage.from('general').getPublicUrl(storagePath);
       
-      await _supabase.from('users').update({'imagen_perfil': publicUrl}).eq('user_id', user.id);
+      await _supabase.from('users').update({
+        'imagen_perfil': publicUrl,
+        'fotodeperfil': publicUrl,
+        'perfilCompletado': true,
+      }).eq('user_id', user.id);
       
       setState(() {
         _profileImageUrl = publicUrl;

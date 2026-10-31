@@ -42,8 +42,8 @@ class LocationService {
       return LatLng(position.latitude, position.longitude);
     } catch (e) {
       print('Error al obtener posición GPS (posible simulador): $e');
-      // Fallback a CDMX si el GPS falla o tarda mucho (muy útil en simuladores)
-      return const LatLng(19.4326, -99.1332);
+      // Fallback a Tuxtla Gutiérrez, Chiapas si el GPS falla o tarda mucho (muy útil en simuladores)
+      return const LatLng(16.7569, -93.1292);
     }
   }
 

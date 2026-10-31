@@ -21,6 +21,7 @@ class Trip {
   final String? photoDriver;
   final double? totalFinal; // Ganancia del conductor (80%)
   final bool? isReview; // Indica si el pasajero ya calificó el viaje
+  final int? codigo; // Código de 5 dígitos para verificar el viaje (estilo Uber)
 
   Trip({
     this.id,
@@ -45,6 +46,7 @@ class Trip {
     this.photoDriver,
     this.totalFinal,
     this.isReview,
+    this.codigo,
   });
 
   factory Trip.fromJson(Map<String, dynamic> json) {
@@ -71,6 +73,7 @@ class Trip {
       photoDriver: json['photo_driver']?.toString(),
       totalFinal: json['total_final'] != null ? (json['total_final'] as num).toDouble() : null,
       isReview: json['isReview'] == true || json['is_review'] == true,
+      codigo: json['codigo'] != null ? num.tryParse(json['codigo'].toString())?.toInt() : null,
     );
   }
 
@@ -98,6 +101,59 @@ class Trip {
       if (photoDriver != null) 'photo_driver': photoDriver,
       if (totalFinal != null) 'total_final': totalFinal,
       if (isReview != null) 'isReview': isReview,
+      if (codigo != null) 'codigo': codigo,
     };
+  }
+
+  Trip copyWith({
+    String? id,
+    String? userId,
+    String? driverId,
+    String? originAddress,
+    String? destinationAddress,
+    double? originLat,
+    double? originLng,
+    double? destinationLat,
+    double? destinationLng,
+    String? postalCode,
+    String? delegation,
+    String? status,
+    double? fare,
+    double? distanceKm,
+    DateTime? createdAt,
+    DateTime? arrivedAt,
+    DateTime? completedAt,
+    String? paymentMethod,
+    String? nameDriver,
+    String? photoDriver,
+    double? totalFinal,
+    bool? isReview,
+    int? codigo,
+  }) {
+    return Trip(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      driverId: driverId ?? this.driverId,
+      originAddress: originAddress ?? this.originAddress,
+      destinationAddress: destinationAddress ?? this.destinationAddress,
+      originLat: originLat ?? this.originLat,
+      originLng: originLng ?? this.originLng,
+      destinationLat: destinationLat ?? this.destinationLat,
+      destinationLng: destinationLng ?? this.destinationLng,
+      postalCode: postalCode ?? this.postalCode,
+      delegation: delegation ?? this.delegation,
+      status: status ?? this.status,
+      fare: fare ?? this.fare,
+      distanceKm: distanceKm ?? this.distanceKm,
+      createdAt: createdAt ?? this.createdAt,
+      arrivedAt: arrivedAt ?? this.arrivedAt,
+      completedAt: completedAt ?? this.completedAt,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      nameDriver: nameDriver ?? this.nameDriver,
+      photoDriver: photoDriver ?? this.photoDriver,
+      totalFinal: totalFinal ?? this.totalFinal,
+      isReview: isReview ?? this.isReview,
+      codigo: codigo ?? this.codigo,
+    );
   }
 }

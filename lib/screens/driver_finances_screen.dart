@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../models/trip.dart';
 import '../services/trip_service.dart';
@@ -26,6 +25,12 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
   Map<String, double> _monthlyEarnings = {};
   double _totalEarnings = 0.0;
   DateTime? _nextCutoffDate;
+
+  // Ganancias por referidos (20% del 1er viaje)
+  double _totalReferralEarnings = 0.0;
+  int _totalReferralsCount = 0;
+  int _activeReferralsCount = 0;
+  List<Map<String, dynamic>> _driverReferrals = [];
 
   @override
   void initState() {
@@ -58,6 +63,67 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
           _nextCutoffDate = DateTime.tryParse(cutoffRes[0]['fecha_corte'].toString());
         }
       } catch (_) {}
+
+      // Cargar referidos del conductor y comisiones acumuladas (20%)
+      try {
+        final condRes = await Supabase.instance.client
+            .from('conductores')
+            .select('nombre, nombre_completo, telefono')
+            .eq('user_id', _driverId!)
+            .maybeSingle();
+
+        final String driverPhone = (condRes?['telefono'] ?? '').toString();
+        final String driverName = (condRes?['nombre_completo'] ?? condRes?['nombre'] ?? '').toString();
+        final cleanDriverPhone = driverPhone.replaceAll(RegExp(r'\D'), '');
+        final cleanName = driverName.trim().toLowerCase();
+
+        if (cleanDriverPhone.isNotEmpty || cleanName.isNotEmpty) {
+          final refUsers = await Supabase.instance.client
+              .from('users')
+              .select('id, nombre, usuario_activado, comision_referido, time_referido, created_at, referido')
+              .not('referido', 'is', null);
+
+          final list = List<Map<String, dynamic>>.from(refUsers);
+          final matched = list.where((u) {
+            final ref = (u['referido'] ?? '').toString().trim().toLowerCase();
+            if (ref.isEmpty) return false;
+            final cleanRefDigits = ref.replaceAll(RegExp(r'\D'), '');
+
+            // 1. Coincidencia por teléfono del conductor
+            if (cleanDriverPhone.isNotEmpty && cleanRefDigits.isNotEmpty) {
+              if (cleanRefDigits == cleanDriverPhone ||
+                  cleanRefDigits.endsWith(cleanDriverPhone) ||
+                  cleanDriverPhone.endsWith(cleanRefDigits)) {
+                return true;
+              }
+            }
+
+            // 2. Coincidencia por nombre para registros existentes
+            if (cleanName.isNotEmpty && (ref == cleanName || ref.contains(cleanName) || cleanName.contains(ref))) {
+              return true;
+            }
+
+            return false;
+          }).toList();
+
+          double refEarnings = 0.0;
+          int activeCount = 0;
+          for (var u in matched) {
+            if (u['usuario_activado'] == true) {
+              activeCount++;
+              final com = (u['comision_referido'] as num?)?.toDouble() ?? 0.0;
+              refEarnings += com;
+            }
+          }
+
+          _totalReferralEarnings = refEarnings;
+          _totalReferralsCount = matched.length;
+          _activeReferralsCount = activeCount;
+          _driverReferrals = matched;
+        }
+      } catch (refErr) {
+        print('Error cargando referidos del conductor: $refErr');
+      }
 
       if (mounted) {
         setState(() {
@@ -189,6 +255,8 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
                             _buildTotalAllTimeCard()
                           else
                             _buildChartSection(),
+                          const SizedBox(height: 16),
+                          _buildReferralsEarningsCard(),
                           const SizedBox(height: 24),
                           const Text(
                             'Historial de Registros',
@@ -513,7 +581,54 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
           ),
           const SizedBox(height: 16),
           const Text(
-            'Tus Ganancias (80%)',
+            'Tus Ganancias de Viajes (80%)',
+            style: TextStyle(
+              fontFamily: 'Google Sans',
+              color: Colors.white70,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '\$${(_totalEarnings * 0.8).toStringAsFixed(2)}',
+            style: const TextStyle(
+              fontFamily: 'Google Sans',
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          if (_totalReferralEarnings > 0) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFC7FF2E).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFC7FF2E).withValues(alpha: 0.4)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.people_alt, size: 15, color: Color(0xFFC7FF2E)),
+                  const SizedBox(width: 6),
+                  Text(
+                    '+ \$${_totalReferralEarnings.toStringAsFixed(2)} por referidos (20%)',
+                    style: const TextStyle(
+                      fontFamily: 'Google Sans',
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFC7FF2E),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          const Text(
+            'Total Acumulado a Recibir',
             style: TextStyle(
               fontFamily: 'Google Sans',
               color: Colors.white70,
@@ -523,7 +638,7 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '\$${(_totalEarnings * 0.8).toStringAsFixed(2)}',
+            '\$${((_totalEarnings * 0.8) + _totalReferralEarnings).toStringAsFixed(2)}',
             style: const TextStyle(
               fontFamily: 'Google Sans',
               color: Color(0xFFC7FF2E), // AppColors.electricGreen
@@ -717,6 +832,201 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReferralsEarningsCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 15,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFC7FF2E).withValues(alpha: 0.3),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.group_add, color: Colors.black87, size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'Mis Referidos',
+                    style: TextStyle(
+                      fontFamily: 'Google Sans',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  '20% Bono',
+                  style: TextStyle(
+                    fontFamily: 'Google Sans',
+                    color: Color(0xFFC7FF2E),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Ganado por Referidos',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        color: Colors.black54,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '\$${_totalReferralEarnings.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontFamily: 'Google Sans',
+                        color: Color(0xFF2E7D32),
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(width: 1, height: 40, color: Colors.grey.shade200),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Usuarios Activos',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        color: Colors.black54,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$_activeReferralsCount / $_totalReferralsCount',
+                      style: const TextStyle(
+                        fontFamily: 'Google Sans',
+                        color: Colors.black87,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF7F8FA),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, size: 16, color: Colors.grey.shade600),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _totalReferralsCount == 0
+                        ? 'Comparte tu número de teléfono (+52) con tus pasajeros para que lo ingresen al registrarse y ganes el 20% de su primer viaje.'
+                        : 'Recibes el 20% del monto total del primer viaje que complete cada usuario que refieras.',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 11,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_driverReferrals.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            const SizedBox(height: 10),
+            ..._driverReferrals.take(4).map((u) {
+              final name = (u['nombre'] ?? 'Usuario').toString();
+              final isAct = u['usuario_activado'] == true;
+              final com = (u['comision_referido'] as num?)?.toDouble() ?? 0.0;
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          isAct ? Icons.check_circle : Icons.hourglass_top,
+                          size: 14,
+                          color: isAct ? const Color(0xFF2E7D32) : Colors.amber.shade800,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          name,
+                          style: const TextStyle(
+                            fontFamily: 'Google Sans',
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      isAct ? '+\$${com.toStringAsFixed(2)}' : 'Pendiente',
+                      style: TextStyle(
+                        fontFamily: 'Google Sans',
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: isAct ? const Color(0xFF2E7D32) : Colors.amber.shade900,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
         ],
       ),
     );

@@ -13,6 +13,8 @@ import '../screens/profile_screen.dart';
 import '../models/trip.dart';
 import '../services/trip_service.dart';
 import '../services/mapbox_service.dart';
+import '../services/geofence_service.dart';
+import '../services/location_service.dart';
 import 'auth_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -117,10 +119,55 @@ class _HomeScreenState extends State<HomeScreen> {
       _isLoading = true;
     });
 
+    final locService = LocationService();
+    final currentLoc = await locService.getCurrentLocation();
+    final double originLat = _selectedOriginLatLng?.latitude ?? currentLoc?.latitude ?? GeofenceService.defaultChiapasCenter.latitude;
+    final double originLng = _selectedOriginLatLng?.longitude ?? currentLoc?.longitude ?? GeofenceService.defaultChiapasCenter.longitude;
+
+    // Validación de zona: Solo permitido en Chiapas
+    final bool canRequest = await GeofenceService.canRequestTrip(
+      userId: user.id,
+      origin: LatLng(originLat, originLng),
+    );
+
+    if (!canRequest) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Row(
+              children: [
+                Icon(Icons.location_off_rounded, color: Colors.orange, size: 28),
+                SizedBox(width: 8),
+                Text('Zona no disponible'),
+              ],
+            ),
+            content: const Text(
+              'Por el momento, el servicio de TaxiSeguro solo está disponible para solicitar conductores dentro del estado de Chiapas.',
+              style: TextStyle(fontSize: 15, height: 1.4),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Entendido', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+              ),
+            ],
+          ),
+        );
+      }
+      return;
+    }
+
     final newTrip = Trip(
       userId: user.id,
       originAddress: _selectedOrigin!,
       destinationAddress: _selectedDestination!,
+      originLat: originLat,
+      originLng: originLng,
+      destinationLat: _selectedDestinationLatLng?.latitude,
+      destinationLng: _selectedDestinationLatLng?.longitude,
     );
 
     final trip = await _tripService.createTrip(newTrip);

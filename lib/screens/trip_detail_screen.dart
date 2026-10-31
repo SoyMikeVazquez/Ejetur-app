@@ -38,8 +38,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _originCoord = LatLng(widget.trip.originLat ?? 19.4326, widget.trip.originLng ?? -99.1332);
-    _destCoord = LatLng(widget.trip.destinationLat ?? 19.42, widget.trip.destinationLng ?? -99.14);
+    _originCoord = LatLng(widget.trip.originLat ?? 16.7569, widget.trip.originLng ?? -93.1292);
+    _destCoord = LatLng(widget.trip.destinationLat ?? 16.7530, widget.trip.destinationLng ?? -93.1150);
     
     if (widget.trip.nameDriver?.isNotEmpty == true) {
       _driverName = widget.trip.nameDriver!;

@@ -56,4 +56,6 @@ test_*.dart
 scratch/
 scratch_*.dart
 *.bak
+*.jks
+*.keystore
 

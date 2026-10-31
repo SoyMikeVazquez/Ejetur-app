@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:latlong2/latlong.dart';
@@ -17,12 +16,17 @@ import '../models/trip.dart';
 import '../services/trip_service.dart';
 import '../services/pricing_service.dart';
 import '../services/mapbox_service.dart';
-import '../services/pricing_service.dart';
 import '../services/location_service.dart';
 import '../theme/app_theme.dart';
 import '../services/background_service.dart';
 import '../services/rating_service.dart';
+import '../services/geofence_service.dart';
+import '../widgets/animated_ad_card.dart';
+import '../widgets/ad_detail_dialog.dart';
 import 'auth_screen.dart';
+import 'package:liquid_glass_easy/liquid_glass_easy.dart';
+import '../models/ad.dart';
+import '../services/ad_service.dart';
 
 class TaxiseguroHomeScreen extends StatefulWidget {
   const TaxiseguroHomeScreen({super.key});
@@ -227,9 +231,10 @@ class _TaxiseguroHomeScreenState extends State<TaxiseguroHomeScreen> {
             BackgroundServiceHelper.updateTripStatus('Conductor Llegó', 'Tu conductor está afuera');
             if (_lastNotifiedStatus != 'arrived') {
               _lastNotifiedStatus = 'arrived';
+              final pinMsg = trip.codigo != null ? ' Tu PIN de viaje es ${trip.codigo.toString().padLeft(5, '0')}.' : '';
               BackgroundServiceHelper.showAlertNotification(
                 '📍 ¡Tu Conductor Llegó!',
-                'El taxi está esperándote en tu punto de partida.',
+                'El taxi está esperándote en tu punto de partida.$pinMsg',
               );
             }
           } else if (trip.status == 'in_progress') {
@@ -385,6 +390,45 @@ class _TaxiseguroHomeScreenState extends State<TaxiseguroHomeScreen> {
     final locService = LocationService();
     final currentLoc = await locService.getCurrentLocation();
     
+    final double originLat = _selectedOriginLatLng?.latitude ?? currentLoc?.latitude ?? GeofenceService.defaultChiapasCenter.latitude;
+    final double originLng = _selectedOriginLatLng?.longitude ?? currentLoc?.longitude ?? GeofenceService.defaultChiapasCenter.longitude;
+
+    // Validación de zona: Solo permitido en el estado de Chiapas (salvo permiso especial)
+    final bool canRequest = await GeofenceService.canRequestTrip(
+      userId: user.id,
+      origin: LatLng(originLat, originLng),
+    );
+
+    if (!canRequest) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Row(
+              children: [
+                Icon(Icons.location_off_rounded, color: Colors.orange, size: 28),
+                SizedBox(width: 8),
+                Text('Zona no disponible'),
+              ],
+            ),
+            content: const Text(
+              'Por el momento, el servicio de TaxiSeguro solo está disponible para solicitar conductores dentro del estado de Chiapas.',
+              style: TextStyle(fontSize: 15, height: 1.4),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Entendido', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+              ),
+            ],
+          ),
+        );
+      }
+      return;
+    }
+
     String finalOriginAddress = _selectedOrigin!;
     if (finalOriginAddress.toLowerCase().contains('ubicación actual') && currentLoc != null) {
       final reverseGeocoded = await _mapboxService.reverseGeocode(
@@ -399,8 +443,8 @@ class _TaxiseguroHomeScreenState extends State<TaxiseguroHomeScreen> {
       userId: user.id,
       originAddress: finalOriginAddress,
       destinationAddress: _selectedDestination!,
-      originLat: _selectedOriginLatLng?.latitude ?? currentLoc?.latitude ?? 19.4326,
-      originLng: _selectedOriginLatLng?.longitude ?? currentLoc?.longitude ?? -99.1332,
+      originLat: originLat,
+      originLng: originLng,
       destinationLat: _selectedDestinationLatLng?.latitude,
       destinationLng: _selectedDestinationLatLng?.longitude,
       fare: calculatedFare,
@@ -493,12 +537,7 @@ class _TaxiseguroHomeScreenState extends State<TaxiseguroHomeScreen> {
             ),
             
             if (!isTripActive)
-              Positioned(
-                left: 24,
-                right: 24,
-                bottom: 34,
-                child: _buildFloatingBottomNav(),
-              ),
+              _buildFloatingBottomNav(),
           ],
         ),
       ),
@@ -688,59 +727,38 @@ class _TaxiseguroHomeScreenState extends State<TaxiseguroHomeScreen> {
           const SizedBox(height: 16),
 
           if (_isLoadingAds)
-             const SizedBox(height: 140, child: Center(child: CircularProgressIndicator(color: Colors.black))),
+             const SizedBox(height: 185, child: Center(child: CircularProgressIndicator(color: Colors.black))),
           if (!_isLoadingAds && _ads.isNotEmpty) ...[
              SizedBox(
-               height: 140,
+               height: 185,
                child: ListView.separated(
                  scrollDirection: Axis.horizontal,
                  itemCount: _ads.length,
                  separatorBuilder: (context, index) => const SizedBox(width: 16),
                  itemBuilder: (context, index) {
                    final ad = _ads[index];
-                   return Container(
-                     width: 240,
-                     decoration: BoxDecoration(
-                       color: AppColors.appBlack,
-                       borderRadius: BorderRadius.circular(24),
-                       image: ad.imagenAds != null && ad.imagenAds!.isNotEmpty
-                           ? DecorationImage(
-                               image: NetworkImage(ad.imagenAds!),
-                               fit: BoxFit.cover,
-                               colorFilter: ColorFilter.mode(Colors.black.withValues(alpha: 0.4), BlendMode.darken),
-                             )
-                           : null,
-                     ),
-                     padding: const EdgeInsets.all(16),
-                     child: Column(
-                       crossAxisAlignment: CrossAxisAlignment.start,
-                       mainAxisAlignment: MainAxisAlignment.end,
-                       children: [
-                         if (ad.tituloAds != null && ad.tituloAds!.isNotEmpty)
-                           Text(
-                             ad.tituloAds!,
-                             style: const TextStyle(
-                               color: Colors.white,
-                               fontSize: 16,
-                               fontWeight: FontWeight.bold,
-                             ),
-                             maxLines: 1,
-                             overflow: TextOverflow.ellipsis,
-                           ),
-                         if (ad.descripcionAds != null && ad.descripcionAds!.isNotEmpty) ...[
-                           const SizedBox(height: 4),
-                           Text(
-                             ad.descripcionAds!,
-                             style: const TextStyle(
-                               color: Colors.white70,
-                               fontSize: 12,
-                             ),
-                             maxLines: 2,
-                             overflow: TextOverflow.ellipsis,
-                           ),
-                         ],
-                       ],
-                     ),
+                   return AnimatedAdCard(
+                     imageUrl: ad.imagenAds,
+                     title: ad.tituloAds,
+                     description: ad.descripcionAds,
+                     width: 295,
+                     height: 185,
+                     onTap: () {
+                       if (ad.id > 0) {
+                         AdService.recordAdView(ad.id);
+                       }
+                       AdDetailDialog.show(
+                         context,
+                         adId: ad.id,
+                         imageUrl: ad.imagenAds,
+                         title: ad.tituloAds,
+                         description: ad.descripcionAds,
+                         numeroContacto: ad.numeroContacto,
+                         whatsapp: ad.whatsapp,
+                         visitas: ad.visitas,
+                         clicksContacto: ad.clicksContacto,
+                       );
+                     },
                    );
                  },
                ),
@@ -979,73 +997,122 @@ class _TaxiseguroHomeScreenState extends State<TaxiseguroHomeScreen> {
   }
 
   Widget _buildFloatingBottomNav() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85),
-        borderRadius: BorderRadius.circular(35),
-        border: Border.all(color: Colors.white.withOpacity(0.9), width: 1.5),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 20,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(35),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12.0, sigmaY: 12.0),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(Icons.home_filled, 0),
-                _buildNavItem(Icons.directions_car_filled, 1),
-                _buildNavItem(Icons.settings, 2),
-                _buildNavItem(Icons.logout, 3, isLogout: true, onTap: () async {
-                  await Supabase.instance.client.auth.signOut();
-                  if (mounted) {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const AuthScreen()),
-                      (route) => false,
-                    );
-                  }
-                }),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ).animate().fade(duration: 600.ms, delay: 400.ms).slideY(begin: 0.5, end: 0, duration: 600.ms, delay: 400.ms, curve: Curves.easeOutBack);
-  }
+    final double screen = MediaQuery.sizeOf(context).width;
+    final double barWidth = (screen - 36).clamp(280.0, 520.0);
 
-  Widget _buildNavItem(IconData icon, int index, {VoidCallback? onTap, bool isLogout = false}) {
-    final isSelected = _currentIndex == index && !isLogout;
-    return GestureDetector(
-      onTap: () {
-        if (!isLogout) {
-          setState(() => _currentIndex = index);
+    return LiquidGlassTabBar(
+      items: [
+        _buildTabItem(Icons.home_filled, 'Inicio'),
+        _buildTabItem(Icons.directions_car_filled, 'Viajes'),
+        _buildTabItem(Icons.settings, 'Ajustes'),
+        _buildTabItem(Icons.logout, 'Salir'),
+      ],
+      selectedIndex: _currentIndex,
+      onChanged: (index) {
+        if (index == 3) {
+          _confirmLogout();
+          return;
         }
-        if (onTap != null) onTap();
+        setState(() => _currentIndex = index);
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.electricGreen : Colors.transparent,
-          shape: BoxShape.circle,
+      width: barWidth,
+      height: 64,
+      itemPadding: 4,
+      margin: const EdgeInsets.only(bottom: 24),
+      style: const LiquidGlassStyle(
+        shape: LiquidGlassShape.continuousRoundedRectangle(
+          cornerRadius: 32,
+          clipQuality: LiquidGlassClipQuality.exact,
         ),
-        child: Icon(
-          icon,
-          color: isLogout
-              ? Colors.redAccent
-              : (isSelected ? Colors.black : AppColors.midGray),
-          size: 24,
+        specular: LiquidGlassLight.specular(
+          thickness: 6.5,
+          angle: 45,
+        ),
+        glow: LiquidGlassLight.glow(
+          thickness: 16.0,
+          angle: 135,
+        ),
+        refractionIndex: 1.35,
+        refractionWidth: 24,
+        dispersion: 3.0,
+        color: Color(0x35FFFFFF), // Cristal translúcido óptico
+        blur: 14,
+        shadow: LiquidGlassShadow(blur: 16, opacity: 0.20, offset: Offset(0, 6)),
+      ),
+      itemStyle: const LiquidGlassTabItemStyle(
+        selectedColor: Colors.black,
+        unselectedColor: Colors.black,
+        iconSize: 23,
+        labelFontSize: 11,
+        iconLabelGap: 2,
+        underGlassIconSize: 26,
+        underGlassLabelFontSize: 11,
+        selectedFontWeight: FontWeight.w900,
+        unselectedFontWeight: FontWeight.w800,
+      ),
+      pillStyle: const LiquidGlassTabPillStyle(
+        mode: LiquidGlassPillMode.both,
+        growHeight: 6.0,
+        refractionIndex: 1.30,
+        refractionWidth: 18,
+        rest: LiquidGlassStyle(
+          shape: LiquidGlassShape.continuousRoundedRectangle(
+            cornerRadius: 26,
+            clipQuality: LiquidGlassClipQuality.exact,
+          ),
+          color: Color(0x22000000), // Cristal ahumado translúcido de contraste
         ),
       ),
     );
+  }
+
+  LiquidGlassTabBarItem _buildTabItem(IconData icon, String label) {
+    final bool isLogout = icon == Icons.logout;
+    return LiquidGlassTabBarItem(
+      label: label,
+      iconBuilder: (context, i) {
+        return Icon(
+          icon,
+          size: i.underGlass == true ? 25 : 23,
+          color: isLogout ? Colors.redAccent : Colors.black,
+        );
+      },
+    );
+  }
+
+  Future<void> _confirmLogout() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Cerrar Sesión', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text('¿Estás seguro de que deseas cerrar tu sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.black54)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Cerrar Sesión', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await Supabase.instance.client.auth.signOut();
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const AuthScreen()),
+          (route) => false,
+        );
+      }
+    }
   }
 }
 
@@ -1054,27 +1121,4 @@ extension StringExtension on String {
       if (isEmpty) return this;
       return "${this[0].toUpperCase()}${substring(1)}";
     }
-}
-
-class Ad {
-  final int id;
-  final String? imagenAds;
-  final String? tituloAds;
-  final String? descripcionAds;
-
-  Ad({
-    required this.id,
-    this.imagenAds,
-    this.tituloAds,
-    this.descripcionAds,
-  });
-
-  factory Ad.fromJson(Map<String, dynamic> json) {
-    return Ad(
-      id: json['id'] as int,
-      imagenAds: json['imagen_ads']?.toString(),
-      tituloAds: json['titulo_ads']?.toString(),
-      descripcionAds: json['descripcion_ads']?.toString(),
-    );
-  }
 }

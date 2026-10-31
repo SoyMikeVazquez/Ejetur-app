@@ -41,7 +41,7 @@ class _MapWidgetState extends State<MapWidget> {
   final MapboxService _mapboxService = MapboxService();
   final LocationService _locationService = LocationService();
 
-  LatLng _currentPosition = const LatLng(19.4326, -99.1332); // Default CDMX
+  LatLng _currentPosition = const LatLng(16.7569, -93.1292); // Default Tuxtla Gutiérrez, Chiapas
   LatLng? _destinationLatLng;
   List<LatLng> _routePoints = [];
   StreamSubscription<LatLng>? _locationSubscription;
