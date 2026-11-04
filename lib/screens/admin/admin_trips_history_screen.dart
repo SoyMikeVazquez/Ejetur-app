@@ -108,7 +108,7 @@ class _AdminTripsHistoryScreenState extends State<AdminTripsHistoryScreen> {
         return Theme(
           data: ThemeData.light().copyWith(
             primaryColor: Colors.black,
-            colorScheme: const ColorScheme.light(primary: Colors.black, onPrimary: Color(0xFFC7FF2E)),
+            colorScheme: const ColorScheme.light(primary: Colors.black, onPrimary: Color(0xFF050505)),
             buttonTheme: const ButtonThemeData(textTheme: ButtonTextTheme.primary),
           ),
           child: child!,
@@ -344,7 +344,7 @@ class _AdminTripsHistoryScreenState extends State<AdminTripsHistoryScreen> {
                     const Text('Mostrando viajes del:', style: TextStyle(color: Colors.white70, fontSize: 12)),
                     Text(
                       DateFormat('EEEE, d MMMM y', 'es_MX').format(_selectedDate),
-                      style: const TextStyle(color: Color(0xFFC7FF2E), fontWeight: FontWeight.bold, fontSize: 15),
+                      style: const TextStyle(color: Color(0xFF050505), fontWeight: FontWeight.bold, fontSize: 15),
                     ),
                   ],
                 ),
@@ -353,8 +353,8 @@ class _AdminTripsHistoryScreenState extends State<AdminTripsHistoryScreen> {
                   icon: const Icon(Icons.edit_calendar, size: 16, color: Colors.black),
                   label: const Text('Cambiar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFC7FF2E),
-                    foregroundColor: Colors.black,
+                    backgroundColor: const Color(0xFF050505),
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     minimumSize: Size.zero,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -420,7 +420,7 @@ class _AdminTripsHistoryScreenState extends State<AdminTripsHistoryScreen> {
                               onPressed: _pickDate,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.black,
-                                foregroundColor: const Color(0xFFC7FF2E),
+                                foregroundColor: const Color(0xFF050505),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
                               child: const Text('Buscar en otra fecha'),

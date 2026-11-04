@@ -71,7 +71,7 @@ class _AdminDriverShiftsScreenState extends State<AdminDriverShiftsScreen> {
             child: IconButton(
               icon: const Icon(Icons.calendar_month, color: Colors.black, size: 22),
               style: IconButton.styleFrom(
-                backgroundColor: const Color(0xFFC7FF2E).withValues(alpha: 0.3),
+                backgroundColor: const Color(0xFF050505).withValues(alpha: 0.3),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               onPressed: () => _pickDate(context),
@@ -107,7 +107,7 @@ class _AdminDriverShiftsScreenState extends State<AdminDriverShiftsScreen> {
                       DateFormat('EEEE, d MMMM yyyy', 'es_MX').format(_selectedDate),
                       style: const TextStyle(
                         fontFamily: 'Google Sans',
-                        color: Color(0xFFC7FF2E),
+                        color: Color(0xFF050505),
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
@@ -152,7 +152,7 @@ class _AdminDriverShiftsScreenState extends State<AdminDriverShiftsScreen> {
                           icon: const Icon(Icons.search, color: Colors.black),
                           label: const Text('Buscar en otra fecha', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFC7FF2E),
+                            backgroundColor: const Color(0xFF050505),
                             elevation: 0,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -237,7 +237,7 @@ class _AdminDriverShiftsScreenState extends State<AdminDriverShiftsScreen> {
                               ),
                               child: Text(
                                 '${session.minutosActivo}m',
-                                style: const TextStyle(color: Color(0xFFC7FF2E), fontWeight: FontWeight.bold, fontSize: 13),
+                                style: const TextStyle(color: Color(0xFF050505), fontWeight: FontWeight.bold, fontSize: 13),
                               ),
                             ),
                           ],
@@ -282,7 +282,7 @@ class _AdminDriverShiftsScreenState extends State<AdminDriverShiftsScreen> {
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
               primary: Colors.black,
-              onPrimary: Color(0xFFC7FF2E),
+              onPrimary: Color(0xFF050505),
               onSurface: Colors.black,
             ),
             textButtonTheme: TextButtonThemeData(

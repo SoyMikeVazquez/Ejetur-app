@@ -927,7 +927,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                           padding: const EdgeInsets.all(6),
                                           decoration: const BoxDecoration(
                                             shape: BoxShape.circle,
-                                            color: Color(0xFFC7FF2E), // Electric Green
+                                            color: Color(0xFF050505), // Modern Black
                                           ),
                                           child: const Icon(
                                             Icons.camera_alt,
@@ -1054,8 +1054,8 @@ class _AuthScreenState extends State<AuthScreen> {
                               child: ElevatedButton(
                                 onPressed: _isLoading ? null : _handleSubmit,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFC7FF2E), // Electric Green
-                                  foregroundColor: Colors.black,
+                                  backgroundColor: const Color(0xFF050505), // Modern Black
+                                  foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30),
                                   ),

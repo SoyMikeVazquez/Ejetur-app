@@ -124,7 +124,7 @@ class _AdminHeatmapScreenState extends State<AdminHeatmapScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFFC7FF2E)))
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF050505)))
           : Stack(
               children: [
                 // Mapa Mapbox Oscuro
@@ -164,7 +164,7 @@ class _AdminHeatmapScreenState extends State<AdminHeatmapScreen> {
                           radius: 22,
                           useRadiusInMeter: false,
                           color: const Color(0xFFFFD700).withValues(alpha: 0.65),
-                          borderColor: const Color(0xFFC7FF2E),
+                          borderColor: const Color(0xFF050505),
                           borderStrokeWidth: 1.5,
                         );
                       }).toList(),
@@ -177,7 +177,7 @@ class _AdminHeatmapScreenState extends State<AdminHeatmapScreen> {
                           height: 14,
                           child: Container(
                             decoration: const BoxDecoration(
-                              color: Color(0xFFC7FF2E),
+                              color: Color(0xFF050505),
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(color: Colors.white, blurRadius: 4),
@@ -231,7 +231,7 @@ class _AdminHeatmapScreenState extends State<AdminHeatmapScreen> {
                             const SizedBox(width: 8),
                             _buildLegendItem('Moderada', const Color(0xFFFFD700)),
                             const SizedBox(width: 8),
-                            _buildLegendItem('Baja', const Color(0xFFC7FF2E)),
+                            _buildLegendItem('Baja', const Color(0xFF050505)),
                           ],
                         ),
                         const SizedBox(height: 14),
@@ -241,8 +241,8 @@ class _AdminHeatmapScreenState extends State<AdminHeatmapScreen> {
                           child: ElevatedButton.icon(
                             onPressed: _isUpdatingRates ? null : _saveDensityRates,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFC7FF2E),
-                              disabledBackgroundColor: const Color(0xFFC7FF2E).withValues(alpha: 0.6),
+                              backgroundColor: const Color(0xFF050505),
+                              disabledBackgroundColor: const Color(0xFF050505).withValues(alpha: 0.6),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               elevation: 0,
                             ),
@@ -281,7 +281,7 @@ class _AdminHeatmapScreenState extends State<AdminHeatmapScreen> {
                           label: const Text('Cancelar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         )
                       : FloatingActionButton.extended(
-                          backgroundColor: const Color(0xFFC7FF2E),
+                          backgroundColor: const Color(0xFF050505),
                           onPressed: _showPricingZonesSheet,
                           icon: const Icon(Icons.monetization_on, color: Colors.black),
                           label: const Text('Lugares con mayor tarifa', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
@@ -364,7 +364,7 @@ class _AdminHeatmapScreenState extends State<AdminHeatmapScreen> {
                 children: [
                   const Text('Zonas de Tarifa Dinámica', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                   IconButton(
-                    icon: const Icon(Icons.add_circle, color: Color(0xFFC7FF2E), size: 28),
+                    icon: const Icon(Icons.add_circle, color: Color(0xFF050505), size: 28),
                     onPressed: () {
                       Navigator.pop(context);
                       setState(() => _isAddingZone = true);
@@ -384,7 +384,7 @@ class _AdminHeatmapScreenState extends State<AdminHeatmapScreen> {
                   subtitle: Text('${z['radius_km']} km | +${z['percentage_increase']}%', style: const TextStyle(color: Colors.grey)),
                   trailing: Switch(
                     value: z['is_active'] == true,
-                    activeColor: const Color(0xFFC7FF2E),
+                    activeColor: const Color(0xFF050505),
                     onChanged: (val) async {
                       await _adminService.toggleDynamicPricingZone(z['id'], val);
                       _loadHeatmap();
@@ -438,7 +438,7 @@ class _AdminHeatmapScreenState extends State<AdminHeatmapScreen> {
               child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC7FF2E)),
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF050505)),
               onPressed: () async {
                 final name = nameController.text.trim();
                 final radius = double.tryParse(radiusController.text) ?? 2.0;

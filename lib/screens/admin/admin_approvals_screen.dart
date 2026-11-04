@@ -50,8 +50,8 @@ class _AdminApprovalsScreenState extends State<AdminApprovalsScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: approve ? const Color(0xFFC7FF2E) : Colors.redAccent,
-              foregroundColor: Colors.black,
+              backgroundColor: approve ? const Color(0xFF050505) : Colors.redAccent,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             ),
             child: Text(approve ? 'Aprobar' : 'Rechazar'),
@@ -140,7 +140,7 @@ class _AdminApprovalsScreenState extends State<AdminApprovalsScreen> {
                         if (progress == null) return child;
                         return const Padding(
                           padding: EdgeInsets.all(40),
-                          child: CircularProgressIndicator(color: Color(0xFFC7FF2E)),
+                          child: CircularProgressIndicator(color: Color(0xFF050505)),
                         );
                       },
                       errorBuilder: (context, error, stackTrace) {
@@ -332,8 +332,8 @@ class _AdminApprovalsScreenState extends State<AdminApprovalsScreen> {
                                       child: ElevatedButton(
                                         onPressed: () => _handleDecision(userId, name, true),
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFFC7FF2E), // Electric Green
-                                          foregroundColor: Colors.black,
+                                          backgroundColor: const Color(0xFF050505), // Modern Black
+                                          foregroundColor: Colors.white,
                                           elevation: 0,
                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                                           padding: const EdgeInsets.symmetric(vertical: 14),

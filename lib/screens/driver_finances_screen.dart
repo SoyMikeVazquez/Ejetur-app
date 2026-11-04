@@ -233,7 +233,7 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: Colors.white,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.black))
@@ -430,7 +430,7 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
           barRods: [
             BarChartRodData(
               toY: val,
-              color: const Color(0xFFC7FF2E), // Electric Green
+              color: const Color(0xFF050505), // Modern Black
               width: 16,
               borderRadius: BorderRadius.circular(8),
               backDrawRodData: BackgroundBarChartRodData(
@@ -604,14 +604,14 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFFC7FF2E).withValues(alpha: 0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFC7FF2E).withValues(alpha: 0.4)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.people_alt, size: 15, color: Color(0xFFC7FF2E)),
+                  const Icon(Icons.people_alt, size: 15, color: Colors.white),
                   const SizedBox(width: 6),
                   Text(
                     '+ \$${_totalReferralEarnings.toStringAsFixed(2)} por referidos (20%)',
@@ -619,7 +619,7 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
                       fontFamily: 'Google Sans',
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFC7FF2E),
+                      color: Color(0xFF050505),
                     ),
                   ),
                 ],
@@ -641,7 +641,7 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
             '\$${((_totalEarnings * 0.8) + _totalReferralEarnings).toStringAsFixed(2)}',
             style: const TextStyle(
               fontFamily: 'Google Sans',
-              color: Color(0xFFC7FF2E), // AppColors.electricGreen
+              color: Colors.white, // AppColors.pureWhite
               fontSize: 48,
               fontWeight: FontWeight.bold,
               letterSpacing: -1.5,
@@ -651,7 +651,7 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.check_circle, color: Color(0xFFC7FF2E), size: 20),
+              const Icon(Icons.check_circle, color: Colors.white, size: 20),
               const SizedBox(width: 8),
               Text(
                 '${_filteredTrips.length} viajes en este periodo',
@@ -863,7 +863,7 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFC7FF2E).withValues(alpha: 0.3),
+                      color: Colors.white.withValues(alpha: 0.3),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.group_add, color: Colors.black87, size: 20),
@@ -890,7 +890,7 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
                   '20% Bono',
                   style: TextStyle(
                     fontFamily: 'Google Sans',
-                    color: Color(0xFFC7FF2E),
+                    color: Color(0xFF050505),
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),

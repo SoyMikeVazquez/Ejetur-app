@@ -87,7 +87,7 @@ class DashboardRevenueCardState extends State<DashboardRevenueCard> {
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
               primary: Colors.black,
-              onPrimary: Color(0xFFC7FF2E),
+              onPrimary: Color(0xFF050505),
               onSurface: Colors.black,
             ),
           ),
@@ -165,7 +165,7 @@ class DashboardRevenueCardState extends State<DashboardRevenueCard> {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFC7FF2E).withValues(alpha: 0.25),
+                          color: const Color(0xFF050505).withValues(alpha: 0.25),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.insights, size: 16, color: Colors.black),
@@ -294,7 +294,7 @@ class DashboardRevenueCardState extends State<DashboardRevenueCard> {
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFC7FF2E).withValues(alpha: 0.3)),
+                    border: Border.all(color: const Color(0xFF050505).withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -302,13 +302,13 @@ class DashboardRevenueCardState extends State<DashboardRevenueCard> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: const [
-                          Icon(Icons.monetization_on, color: Color(0xFFC7FF2E), size: 14),
+                          Icon(Icons.monetization_on, color: Color(0xFF050505), size: 14),
                           SizedBox(width: 4),
                           Text(
                             'Comisión (20%)',
                             style: TextStyle(
                               fontFamily: 'Google Sans',
-                              color: Color(0xFFC7FF2E),
+                              color: Color(0xFF050505),
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
@@ -320,7 +320,7 @@ class DashboardRevenueCardState extends State<DashboardRevenueCard> {
                         _formatCurrency(commission),
                         style: const TextStyle(
                           fontFamily: 'Google Sans',
-                          color: Color(0xFFC7FF2E),
+                          color: Color(0xFF050505),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -441,21 +441,21 @@ class DashboardRevenueCardState extends State<DashboardRevenueCard> {
                       spots: data.chartSpots.isEmpty ? const [FlSpot(0, 0)] : data.chartSpots,
                       isCurved: true,
                       curveSmoothness: 0.35,
-                      color: const Color(0xFFC7FF2E),
+                      color: const Color(0xFF050505),
                       barWidth: 4,
                       isStrokeCapRound: true,
                       dotData: FlDotData(
                         show: data.maxX <= 15,
                         getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
                           radius: 4,
-                          color: const Color(0xFFC7FF2E),
+                          color: const Color(0xFF050505),
                           strokeWidth: 2,
                           strokeColor: Colors.black,
                         ),
                       ),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: const Color(0xFFC7FF2E).withValues(alpha: 0.25),
+                        color: const Color(0xFF050505).withValues(alpha: 0.25),
                       ),
                     ),
                   ],
@@ -467,7 +467,7 @@ class DashboardRevenueCardState extends State<DashboardRevenueCard> {
                           return LineTooltipItem(
                             '\$${spot.y.toStringAsFixed(2)} MXN',
                             const TextStyle(
-                              color: Color(0xFFC7FF2E),
+                              color: Color(0xFF050505),
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -527,7 +527,7 @@ class DashboardRevenueCardState extends State<DashboardRevenueCard> {
                   Expanded(
                     flex: cashPct > 0 ? (cashPct * 10).toInt() : (cardPct > 0 ? 0 : 1),
                     child: Container(
-                      color: const Color(0xFFC7FF2E),
+                      color: const Color(0xFF050505),
                     ),
                   ),
                   Expanded(
@@ -564,7 +564,7 @@ class DashboardRevenueCardState extends State<DashboardRevenueCard> {
                           Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFC7FF2E).withValues(alpha: 0.35),
+                              color: const Color(0xFF050505).withValues(alpha: 0.35),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.payments_outlined, size: 16, color: Colors.black),
@@ -578,7 +578,7 @@ class DashboardRevenueCardState extends State<DashboardRevenueCard> {
                             child: Text(
                               '${cashPct.toStringAsFixed(0)}%',
                               style: const TextStyle(
-                                color: Color(0xFFC7FF2E),
+                                color: Color(0xFF050505),
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -644,7 +644,7 @@ class DashboardRevenueCardState extends State<DashboardRevenueCard> {
                           Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFC7FF2E).withValues(alpha: 0.25),
+                              color: const Color(0xFF050505).withValues(alpha: 0.25),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.credit_card_rounded, size: 16, color: Colors.black),
@@ -658,7 +658,7 @@ class DashboardRevenueCardState extends State<DashboardRevenueCard> {
                             child: Text(
                               '${cardPct.toStringAsFixed(0)}%',
                               style: const TextStyle(
-                                color: Color(0xFFC7FF2E),
+                                color: Color(0xFF050505),
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -744,7 +744,7 @@ class DashboardRevenueCardState extends State<DashboardRevenueCard> {
                     ),
                   ),
                   SizedBox(width: 8),
-                  Icon(Icons.arrow_forward_rounded, color: Color(0xFFC7FF2E), size: 18),
+                  Icon(Icons.arrow_forward_rounded, color: Color(0xFF050505), size: 18),
                 ],
               ),
             ),
@@ -781,7 +781,7 @@ class DashboardRevenueCardState extends State<DashboardRevenueCard> {
             fontFamily: 'Google Sans',
             fontSize: 12,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            color: isSelected ? const Color(0xFFC7FF2E) : Colors.black87,
+            color: isSelected ? const Color(0xFF050505) : Colors.black87,
           ),
         ),
       ),

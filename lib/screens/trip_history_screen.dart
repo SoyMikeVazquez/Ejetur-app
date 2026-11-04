@@ -156,8 +156,8 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
                         child: ElevatedButton(
                           onPressed: () => Navigator.of(context).pop(),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFC7FF2E), // Electric Green
-                            foregroundColor: Colors.black,
+                            backgroundColor: const Color(0xFF050505), // Modern Black
+                            foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(horizontal: 32),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
@@ -280,7 +280,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
                         height: 28,
                         color: Colors.grey[300],
                       ),
-                      const Icon(Icons.location_on, size: 16, color: Color(0xFFC7FF2E)),
+                      const Icon(Icons.location_on, size: 16, color: Color(0xFF050505)),
                     ],
                   ),
                   const SizedBox(width: 12),

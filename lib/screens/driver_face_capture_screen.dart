@@ -143,7 +143,7 @@ class _DriverFaceCaptureScreenState extends State<DriverFaceCaptureScreen> {
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFFC7FF2E), width: 4),
+                    border: Border.all(color: const Color(0xFF050505), width: 4),
                     boxShadow: const [
                       BoxShadow(color: Colors.black12, blurRadius: 20, offset: Offset(0, 10)),
                     ],
@@ -188,7 +188,7 @@ class _DriverFaceCaptureScreenState extends State<DriverFaceCaptureScreen> {
                 child: ElevatedButton(
                   onPressed: (_capturedImage == null || _isUploading) ? null : _uploadAndContinue,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFC7FF2E),
+                    backgroundColor: const Color(0xFF050505),
                     disabledBackgroundColor: Colors.grey[300],
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     elevation: 0,
@@ -197,7 +197,7 @@ class _DriverFaceCaptureScreenState extends State<DriverFaceCaptureScreen> {
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2.5),
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                         )
                       : const Text(
                           'Guardar y Continuar',

@@ -165,7 +165,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                                   backgroundColor: isAdmin
                                       ? Colors.black
                                       : isConductor
-                                          ? const Color(0xFFC7FF2E)
+                                          ? const Color(0xFF050505)
                                           : const Color(0xFFF0F0F0),
                                   child: Icon(
                                     isAdmin
@@ -174,7 +174,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                                             ? Icons.local_taxi
                                             : Icons.person,
                                     color: isAdmin
-                                        ? const Color(0xFFC7FF2E)
+                                        ? const Color(0xFF050505)
                                         : isConductor
                                             ? Colors.black
                                             : Colors.black87,
@@ -196,7 +196,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                                         margin: const EdgeInsets.only(left: 6),
                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                         decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10)),
-                                        child: const Text('ADMIN', style: TextStyle(color: Color(0xFFC7FF2E), fontSize: 10, fontWeight: FontWeight.bold)),
+                                        child: const Text('ADMIN', style: TextStyle(color: Color(0xFF050505), fontSize: 10, fontWeight: FontWeight.bold)),
                                       ),
                                   ],
                                 ),

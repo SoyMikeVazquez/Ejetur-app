@@ -80,12 +80,12 @@ class _SuperAdminMainScreenState extends State<SuperAdminMainScreen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: const [
-                                  Icon(Icons.shield, color: Color(0xFFC7FF2E), size: 14),
+                                  Icon(Icons.shield, color: Color(0xFF050505), size: 14),
                                   SizedBox(width: 6),
                                   Text(
                                     'SUPER ADMIN',
                                     style: TextStyle(
-                                      color: Color(0xFFC7FF2E),
+                                      color: Color(0xFF050505),
                                       fontFamily: 'Google Sans',
                                       fontWeight: FontWeight.bold,
                                       fontSize: 11,
@@ -213,7 +213,7 @@ class _SuperAdminMainScreenState extends State<SuperAdminMainScreen> {
                             '${_stats?.activeDrivers ?? 0} / ${_stats?.totalDrivers ?? 0}',
                             'Activos / Total',
                             Icons.local_taxi,
-                            const Color(0xFFC7FF2E),
+                            const Color(0xFF050505),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -223,7 +223,7 @@ class _SuperAdminMainScreenState extends State<SuperAdminMainScreen> {
                             '${_stats?.totalUsers ?? 0}',
                             'Registrados',
                             Icons.people_alt,
-                            const Color(0xFFC7FF2E),
+                            const Color(0xFF050505),
                           ),
                         ),
                       ],
@@ -239,7 +239,7 @@ class _SuperAdminMainScreenState extends State<SuperAdminMainScreen> {
                             '${_stats?.totalTrips ?? 0}',
                             'Completados',
                             Icons.navigation,
-                            const Color(0xFFC7FF2E),
+                            const Color(0xFF050505),
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminTripsHistoryScreen())),
                             showActionIcon: true,
                           ),
@@ -251,7 +251,7 @@ class _SuperAdminMainScreenState extends State<SuperAdminMainScreen> {
                             _stats?.nextCutoffDate != null ? '${_stats!.nextCutoffDate!.day.toString().padLeft(2, '0')}/${_stats!.nextCutoffDate!.month.toString().padLeft(2, '0')}' : 'N/A',
                             'Fecha programada',
                             Icons.event_available,
-                            const Color(0xFFC7FF2E),
+                            const Color(0xFF050505),
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminCutoffDatesScreen())),
                             showActionIcon: true,
                           ),
@@ -463,7 +463,7 @@ class _SuperAdminMainScreenState extends State<SuperAdminMainScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isHighlight ? Colors.amber : const Color(0xFFC7FF2E).withValues(alpha: 0.2),
+                  color: isHighlight ? Colors.amber : const Color(0xFF050505).withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: Colors.black, size: 24),

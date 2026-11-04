@@ -558,7 +558,7 @@ class _TaxiseguroHomeScreenState extends State<TaxiseguroHomeScreen> {
 
   Widget _buildIdleLayout(String userName) {
     bool hasActiveTrip = _currentTripData != null && !_isTripCompleted;
-    Color buttonColor = AppColors.electricGreen;
+    Color buttonColor = AppColors.appBlack;
     String buttonTitle = 'Pedir un viaje';
     String buttonSubtitle = 'Auto más cercano a 2 min';
     IconData buttonIcon = Icons.arrow_forward;
@@ -812,7 +812,7 @@ class _TaxiseguroHomeScreenState extends State<TaxiseguroHomeScreen> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.star_rounded, color: AppColors.electricGreen, size: 24),
+                          const Icon(Icons.star_rounded, color: Colors.white, size: 24),
                           const SizedBox(width: 6),
                           Text(
                             _userRating.toStringAsFixed(1),

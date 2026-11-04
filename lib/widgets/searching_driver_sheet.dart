@@ -82,7 +82,7 @@ class _SearchingDriverSheetState extends State<SearchingDriverSheet> with Single
                           height: 48,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: const Color(0xFFC7FF2E).withValues(alpha: 1.0 - _animationController.value),
+                            color: const Color(0xFF050505).withValues(alpha: 1.0 - _animationController.value),
                           ),
                         );
                       },
@@ -96,7 +96,7 @@ class _SearchingDriverSheetState extends State<SearchingDriverSheet> with Single
                       ),
                       child: const Icon(
                         Icons.local_taxi,
-                        color: Color(0xFFC7FF2E),
+                        color: Color(0xFF050505),
                         size: 20,
                       ),
                     ),
@@ -138,7 +138,7 @@ class _SearchingDriverSheetState extends State<SearchingDriverSheet> with Single
               borderRadius: BorderRadius.circular(4),
               child: const LinearProgressIndicator(
                 backgroundColor: Color(0xFFE0E0E0),
-                color: Color(0xFFC7FF2E),
+                color: Color(0xFF050505),
                 minHeight: 4,
               ),
             ),

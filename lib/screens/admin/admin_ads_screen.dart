@@ -76,7 +76,7 @@ class _AdminAdsScreenState extends State<AdminAdsScreen> {
       appBar: AppBar(
         title: const Text('Administrador de Anuncios', style: TextStyle(fontFamily: 'Google Sans', fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: _isLoading
@@ -266,7 +266,7 @@ class _AdminAdsScreenState extends State<AdminAdsScreen> {
                 ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAdBottomSheet(),
-        backgroundColor: const Color(0xFFC7FF2E),
+        backgroundColor: const Color(0xFF050505),
         icon: const Icon(Icons.add, color: Colors.black),
         label: const Text('Nuevo Anuncio', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
@@ -503,7 +503,7 @@ class _AdFormBottomSheetState extends State<_AdFormBottomSheet> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFC7FF2E).withValues(alpha: 0.3),
+                                color: const Color(0xFF050505).withValues(alpha: 0.3),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Text(
@@ -537,7 +537,7 @@ class _AdFormBottomSheetState extends State<_AdFormBottomSheet> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFC7FF2E),
+                                  color: const Color(0xFF050505),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Row(
@@ -645,7 +645,7 @@ class _AdFormBottomSheetState extends State<_AdFormBottomSheet> {
                     child: ElevatedButton(
                       onPressed: _isSaving ? null : _saveAd,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFC7FF2E),
+                        backgroundColor: const Color(0xFF050505),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         elevation: 0,
@@ -654,7 +654,7 @@ class _AdFormBottomSheetState extends State<_AdFormBottomSheet> {
                           ? const SizedBox(
                               width: 20,
                               height: 20,
-                              child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2.5),
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                             )
                           : const Text(
                               'Guardar Anuncio',

@@ -321,7 +321,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                           point: _destCoord,
                           width: 24,
                           height: 24,
-                          child: const Icon(Icons.location_on, color: Color(0xFFC7FF2E), size: 22),
+                          child: const Icon(Icons.location_on, color: Color(0xFF050505), size: 22),
                         ),
                       ],
                     ),
@@ -499,8 +499,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                             child: ElevatedButton(
                               onPressed: _isSubmittingRating ? null : _submitRating,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFC7FF2E), // Electric Green
-                                foregroundColor: Colors.black,
+                                backgroundColor: const Color(0xFF050505), // Modern Black
+                                foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(30),
                                 ),

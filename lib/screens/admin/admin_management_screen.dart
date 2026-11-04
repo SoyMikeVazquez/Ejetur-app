@@ -150,7 +150,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: const BoxDecoration(
-                              color: Color(0xFFC7FF2E),
+                              color: Color(0xFF050505),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.shield, color: Colors.black, size: 22),
@@ -181,7 +181,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                           hintStyle: const TextStyle(color: Colors.white38),
                           filled: true,
                           fillColor: Colors.white12,
-                          prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFFC7FF2E)),
+                          prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF050505)),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20),
                             borderSide: BorderSide.none,
@@ -195,8 +195,8 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                         child: ElevatedButton(
                           onPressed: _assignAdminRole,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFC7FF2E),
-                            foregroundColor: Colors.black,
+                            backgroundColor: const Color(0xFF050505),
+                            foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                           ),
@@ -252,7 +252,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                           leading: const CircleAvatar(
                             radius: 24,
                             backgroundColor: Colors.black,
-                            child: Icon(Icons.admin_panel_settings, color: Color(0xFFC7FF2E), size: 24),
+                            child: Icon(Icons.admin_panel_settings, color: Color(0xFF050505), size: 24),
                           ),
                           title: Text(name, style: const TextStyle(fontFamily: 'Google Sans', fontWeight: FontWeight.bold, fontSize: 16)),
                           subtitle: Text(email, style: const TextStyle(fontSize: 13, color: Colors.black54)),

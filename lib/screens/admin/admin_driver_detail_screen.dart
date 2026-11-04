@@ -176,7 +176,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
                     if (progress == null) return child;
                     return const Padding(
                       padding: EdgeInsets.all(40),
-                      child: CircularProgressIndicator(color: Color(0xFFC7FF2E)),
+                      child: CircularProgressIndicator(color: Color(0xFF050505)),
                     );
                   },
                   errorBuilder: (context, error, stackTrace) => const Padding(
@@ -355,7 +355,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
           tabAlignment: TabAlignment.start,
           labelColor: Colors.black,
           unselectedLabelColor: Colors.grey,
-          indicatorColor: const Color(0xFFC7FF2E),
+          indicatorColor: const Color(0xFF050505),
           indicatorWeight: 3.5,
           labelStyle: const TextStyle(fontFamily: 'Google Sans', fontWeight: FontWeight.bold, fontSize: 13),
           tabs: const [
@@ -415,12 +415,12 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
             color: isOnline ? const Color(0xFF0F172A) : Colors.grey.shade100,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: isOnline ? const Color(0xFFC7FF2E).withValues(alpha: 0.5) : Colors.grey.shade300,
+              color: isOnline ? const Color(0xFF050505).withValues(alpha: 0.5) : Colors.grey.shade300,
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: isOnline ? const Color(0xFFC7FF2E).withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.03),
+                color: isOnline ? const Color(0xFF050505).withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.03),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -433,7 +433,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
                 width: 46,
                 height: 46,
                 decoration: BoxDecoration(
-                  color: isOnline ? const Color(0xFFC7FF2E).withValues(alpha: 0.2) : Colors.grey.shade300,
+                  color: isOnline ? const Color(0xFF050505).withValues(alpha: 0.2) : Colors.grey.shade300,
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -441,12 +441,12 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
                     width: 20,
                     height: 20,
                     decoration: BoxDecoration(
-                      color: isOnline ? const Color(0xFFC7FF2E) : Colors.grey.shade600,
+                      color: isOnline ? const Color(0xFF050505) : Colors.grey.shade600,
                       shape: BoxShape.circle,
                       boxShadow: isOnline
                           ? [
                               BoxShadow(
-                                color: const Color(0xFFC7FF2E).withValues(alpha: 0.6),
+                                color: const Color(0xFF050505).withValues(alpha: 0.6),
                                 blurRadius: 8,
                                 spreadRadius: 2,
                               ),
@@ -467,7 +467,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
                         fontFamily: 'Google Sans',
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
-                        color: isOnline ? const Color(0xFFC7FF2E) : Colors.black87,
+                        color: isOnline ? const Color(0xFF050505) : Colors.black87,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -504,7 +504,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
                         fontFamily: 'Google Sans',
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: isOnline ? Colors.white : const Color(0xFFC7FF2E),
+                        color: isOnline ? Colors.white : const Color(0xFF050505),
                       ),
                     ),
                   ),
@@ -611,7 +611,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
                 children: [
                   CircleAvatar(
                     radius: 28,
-                    backgroundColor: const Color(0xFFC7FF2E),
+                    backgroundColor: const Color(0xFF050505),
                     backgroundImage: photoUrl != null && photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
                     child: photoUrl == null || photoUrl.isEmpty
                         ? Text(
@@ -1032,7 +1032,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
           style: TextStyle(
             fontSize: 11,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            color: isSelected ? const Color(0xFFC7FF2E) : Colors.black87,
+            color: isSelected ? const Color(0xFF050505) : Colors.black87,
           ),
         ),
       ),
@@ -1313,7 +1313,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
               icon: const Icon(Icons.visibility, size: 16, color: Colors.black),
               label: const Text('Ver', style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
               style: TextButton.styleFrom(
-                backgroundColor: const Color(0xFFC7FF2E),
+                backgroundColor: const Color(0xFF050505),
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
@@ -1344,7 +1344,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
               primary: Colors.black,
-              onPrimary: Color(0xFFC7FF2E),
+              onPrimary: Color(0xFF050505),
               surface: Colors.white,
               onSurface: Colors.black,
             ),
@@ -1479,12 +1479,12 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFC7FF2E).withValues(alpha: 0.2),
+                    color: const Color(0xFF050505).withValues(alpha: 0.2),
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFFC7FF2E), width: 1.5),
+                    border: Border.all(color: const Color(0xFF050505), width: 1.5),
                   ),
                   child: const Center(
-                    child: Icon(Icons.monetization_on, color: Color(0xFFC7FF2E), size: 28),
+                    child: Icon(Icons.monetization_on, color: Color(0xFF050505), size: 28),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -1501,7 +1501,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.8,
-                              color: Color(0xFFC7FF2E),
+                              color: Color(0xFF050505),
                             ),
                           ),
                           const SizedBox(width: 6),
@@ -1563,7 +1563,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
                   value: totalInPeriod.toString(),
                   icon: Icons.people_alt_outlined,
                   color: Colors.black87,
-                  accentColor: const Color(0xFFC7FF2E),
+                  accentColor: const Color(0xFF050505),
                 ),
               ),
               const SizedBox(width: 8),
@@ -1625,7 +1625,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFC7FF2E).withValues(alpha: 0.25),
+                          color: const Color(0xFF050505).withValues(alpha: 0.25),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Text(
@@ -1696,7 +1696,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
                           ),
                           child: const Row(
                             children: [
-                              Icon(Icons.edit_calendar_outlined, size: 13, color: Color(0xFFC7FF2E)),
+                              Icon(Icons.edit_calendar_outlined, size: 13, color: Color(0xFF050505)),
                               SizedBox(width: 4),
                               Text(
                                 'Modificar',
@@ -1781,7 +1781,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
                         style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                       style: TextButton.styleFrom(
-                        backgroundColor: const Color(0xFFC7FF2E),
+                        backgroundColor: const Color(0xFF050505),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
@@ -1888,7 +1888,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
             fontFamily: 'Inter',
             fontSize: 11,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            color: isSelected ? const Color(0xFFC7FF2E) : Colors.black87,
+            color: isSelected ? const Color(0xFF050505) : Colors.black87,
           ),
         ),
       ),
@@ -1916,7 +1916,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
             fontFamily: 'Google Sans',
             fontSize: 12,
             fontWeight: FontWeight.bold,
-            color: isSelected ? const Color(0xFFC7FF2E) : Colors.black87,
+            color: isSelected ? const Color(0xFF050505) : Colors.black87,
           ),
         ),
       ),
@@ -1942,7 +1942,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isUserActive ? const Color(0xFFC7FF2E).withValues(alpha: 0.5) : Colors.grey.shade200,
+          color: isUserActive ? const Color(0xFF050505).withValues(alpha: 0.5) : Colors.grey.shade200,
           width: isUserActive ? 1.5 : 1,
         ),
         boxShadow: [
@@ -1966,7 +1966,7 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
                 height: 48,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isUserActive ? const Color(0xFFC7FF2E).withValues(alpha: 0.25) : Colors.grey.shade100,
+                  color: isUserActive ? const Color(0xFF050505).withValues(alpha: 0.25) : Colors.grey.shade100,
                   border: Border.all(
                     color: isUserActive ? const Color(0xFF2E7D32) : Colors.grey.shade300,
                     width: 1.5,

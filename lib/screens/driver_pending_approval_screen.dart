@@ -132,7 +132,7 @@ class _DriverPendingApprovalScreenState extends State<DriverPendingApprovalScree
                 width: 110,
                 height: 110,
                 decoration: BoxDecoration(
-                  color: isRejected ? Colors.red.shade50 : const Color(0xFFC7FF2E).withValues(alpha: 0.15),
+                  color: isRejected ? Colors.red.shade50 : Colors.black.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -140,11 +140,11 @@ class _DriverPendingApprovalScreenState extends State<DriverPendingApprovalScree
                     width: 76,
                     height: 76,
                     decoration: BoxDecoration(
-                      color: isRejected ? Colors.redAccent : const Color(0xFFC7FF2E),
+                      color: isRejected ? Colors.redAccent : const Color(0xFF050505),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: isRejected ? Colors.redAccent.withValues(alpha: 0.3) : const Color(0xFFC7FF2E).withValues(alpha: 0.4),
+                          color: isRejected ? Colors.redAccent.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.2),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                         ),
@@ -257,7 +257,7 @@ class _DriverPendingApprovalScreenState extends State<DriverPendingApprovalScree
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2.5),
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                         )
                       : const Icon(Icons.refresh_rounded, color: Colors.black),
                   label: Text(
@@ -270,7 +270,7 @@ class _DriverPendingApprovalScreenState extends State<DriverPendingApprovalScree
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFC7FF2E), // Electric Green
+                    backgroundColor: const Color(0xFF050505), // Modern Black
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),

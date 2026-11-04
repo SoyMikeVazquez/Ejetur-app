@@ -487,8 +487,8 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFC7FF2E), // Electric yellow/green
-                        foregroundColor: Colors.black,
+                        backgroundColor: const Color(0xFF050505), // Modern Black
+                        foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
                         disabledBackgroundColor: Colors.grey[200],
@@ -725,7 +725,7 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
                   ),
                 ),
               ),
-              const Icon(Icons.payments, size: 64, color: Color(0xFFC7FF2E)),
+              const Icon(Icons.payments, size: 64, color: Color(0xFF050505)),
               const SizedBox(height: 16),
               const Text(
                 'Cobro en Efectivo',
@@ -753,8 +753,8 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
                     _showReviewBottomSheet(fareAmount);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFC7FF2E), // Electric Green
-                    foregroundColor: Colors.black,
+                    backgroundColor: const Color(0xFF050505), // Modern Black
+                    foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   ),
@@ -828,7 +828,7 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
                       return IconButton(
                         icon: Icon(
                           index < rating ? Icons.star : Icons.star_border,
-                          color: const Color(0xFFC7FF2E),
+                          color: const Color(0xFF050505),
                           size: 40,
                         ),
                         onPressed: () {
@@ -848,8 +848,8 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
                         await _completeTripFinal(finalFare, passengerRating: rating);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFC7FF2E),
-                        foregroundColor: Colors.black,
+                        backgroundColor: const Color(0xFF050505),
+                        foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       ),
@@ -1274,7 +1274,7 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
                                 label: const Text('Llamar', style: TextStyle(fontFamily: 'Google Sans', fontWeight: FontWeight.bold, fontSize: 15)),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFF3F3F3),
-                                  foregroundColor: Colors.black,
+                                  foregroundColor: Colors.white,
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                                 ),
@@ -1295,7 +1295,7 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
                                 label: const Text('Mensaje', style: TextStyle(fontFamily: 'Google Sans', fontWeight: FontWeight.bold, fontSize: 15)),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFF3F3F3),
-                                  foregroundColor: Colors.black,
+                                  foregroundColor: Colors.white,
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                                 ),
@@ -1363,15 +1363,15 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
                         child: ElevatedButton.icon(
                           onPressed: _isLoading ? null : actionCallback,
                           icon: _isLoading 
-                            ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2.5))
+                            ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
                             : Icon(actionIcon, size: 24),
                           label: Text(
                             actionText,
                             style: const TextStyle(fontFamily: 'Google Sans', fontSize: 17, fontWeight: FontWeight.bold),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFC7FF2E), // Electric Green
-                            foregroundColor: Colors.black,
+                            backgroundColor: const Color(0xFF050505), // Modern Black
+                            foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                           ),

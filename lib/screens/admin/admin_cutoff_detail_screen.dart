@@ -141,8 +141,8 @@ class _AdminCutoffDetailScreenState extends State<AdminCutoffDetailScreen> {
                             await _confirmPayment(driver);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFC7FF2E),
-                            foregroundColor: Colors.black,
+                            backgroundColor: const Color(0xFF050505),
+                            foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                           ),
                           child: _isUpdating
@@ -218,7 +218,7 @@ class _AdminCutoffDetailScreenState extends State<AdminCutoffDetailScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        foregroundColor: Colors.white,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

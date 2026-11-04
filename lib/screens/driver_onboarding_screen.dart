@@ -351,8 +351,8 @@ class _DriverOnboardingScreenState extends State<DriverOnboardingScreen> {
                           child: ElevatedButton(
                             onPressed: details.onStepContinue,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFC7FF2E), // Electric Green
-                              foregroundColor: Colors.black,
+                              backgroundColor: const Color(0xFF050505), // Modern Black
+                              foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                               elevation: 0,
                             ),
@@ -437,8 +437,8 @@ class _DriverOnboardingScreenState extends State<DriverOnboardingScreen> {
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: isUploaded ? const Color(0xFFC7FF2E).withValues(alpha: 0.1) : const Color(0xFFF3F3F3),
-            border: Border.all(color: isUploaded ? const Color(0xFFC7FF2E) : Colors.transparent),
+            color: isUploaded ? const Color(0xFF050505).withValues(alpha: 0.1) : const Color(0xFFF3F3F3),
+            border: Border.all(color: isUploaded ? const Color(0xFF050505) : Colors.transparent),
             borderRadius: BorderRadius.circular(24),
           ),
           child: Row(

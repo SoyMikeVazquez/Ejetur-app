@@ -180,7 +180,7 @@ class _AdminDriversMonitorScreenState extends State<AdminDriversMonitorScreen> {
                                     padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
                                       color: isAct
-                                          ? const Color(0xFFC7FF2E).withValues(alpha: 0.2)
+                                          ? const Color(0xFF050505).withValues(alpha: 0.2)
                                           : isPend
                                               ? Colors.amber.withValues(alpha: 0.2)
                                               : Colors.grey.shade200,
@@ -253,7 +253,7 @@ class _AdminDriversMonitorScreenState extends State<AdminDriversMonitorScreen> {
         ),
       ),
       selected: isSelected,
-      selectedColor: const Color(0xFFC7FF2E),
+      selectedColor: const Color(0xFF050505),
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       onSelected: (selected) {

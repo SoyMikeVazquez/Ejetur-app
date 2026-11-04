@@ -340,7 +340,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: const Color(0xFFC7FF2E), width: 3),
+                                  border: Border.all(color: const Color(0xFF050505), width: 3),
                                 ),
                                 child: CircleAvatar(
                                   radius: 46,
@@ -545,8 +545,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: ElevatedButton(
                         onPressed: _isSaving ? null : _saveProfile,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFC7FF2E), // Electric Green
-                          foregroundColor: Colors.black,
+                          backgroundColor: const Color(0xFF050505), // Modern Black
+                          foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -556,7 +556,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ? const SizedBox(
                                 width: 24,
                                 height: 24,
-                                child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2.5),
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                               )
                             : const Text(
                                 'Guardar cambios',

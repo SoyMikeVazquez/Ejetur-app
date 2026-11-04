@@ -91,6 +91,25 @@ FOR ALL TO anon USING (true) WITH CHECK (true);
 
 
 -- ========================================================
+-- 3.5 ASEGURAR COLUMNAS EN TABLA CONDUCTORES
+CREATE TABLE IF NOT EXISTS public.conductores (
+    id TEXT PRIMARY KEY,
+    user_id TEXT,
+    nombre TEXT,
+    nombre_completo TEXT,
+    correo TEXT,
+    telefono TEXT,
+    estatus TEXT DEFAULT 'inactivo',
+    "Aprobacion" TEXT DEFAULT 'Pendiente'
+);
+ALTER TABLE public.conductores ADD COLUMN IF NOT EXISTS user_id TEXT;
+ALTER TABLE public.conductores ADD COLUMN IF NOT EXISTS nombre_completo TEXT;
+ALTER TABLE public.conductores ADD COLUMN IF NOT EXISTS nombre TEXT;
+ALTER TABLE public.conductores ADD COLUMN IF NOT EXISTS correo TEXT;
+ALTER TABLE public.conductores ADD COLUMN IF NOT EXISTS telefono TEXT;
+ALTER TABLE public.conductores ADD COLUMN IF NOT EXISTS estatus TEXT DEFAULT 'inactivo';
+ALTER TABLE public.conductores ADD COLUMN IF NOT EXISTS "Aprobacion" TEXT DEFAULT 'Pendiente';
+
 -- 4. FUNCIÓN EN LA NUBE: generar_corte_cada_dos_dias()
 -- Esta función corre dentro de Supabase y calcula todo
 -- ========================================================

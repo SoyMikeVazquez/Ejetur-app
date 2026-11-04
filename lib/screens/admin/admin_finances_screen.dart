@@ -457,7 +457,7 @@ class _AdminFinancesScreenState extends State<AdminFinancesScreen> {
                   'Comisión App (20%)',
                   '${_formatCurrency(_comisionApp)} MXN',
                   'Bruto',
-                  const Color(0xFFC7FF2E),
+                  const Color(0xFF050505),
                   Icons.account_balance,
                   isDark: true,
                 ),
@@ -573,12 +573,12 @@ class _AdminFinancesScreenState extends State<AdminFinancesScreen> {
                         LineChartBarData(
                           spots: _chartSpots.isEmpty ? const [FlSpot(0, 0)] : _chartSpots,
                           isCurved: true,
-                          color: const Color(0xFFC7FF2E),
+                          color: const Color(0xFF050505),
                           barWidth: 4,
                           isStrokeCapRound: true,
                           belowBarData: BarAreaData(
                             show: true,
-                            color: const Color(0xFFC7FF2E).withValues(alpha: 0.25),
+                            color: const Color(0xFF050505).withValues(alpha: 0.25),
                           ),
                           dotData: FlDotData(show: _maxX <= 15),
                         ),
@@ -771,7 +771,7 @@ class _AdminFinancesScreenState extends State<AdminFinancesScreen> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: isDark ? const Color(0xFFC7FF2E) : Colors.green.shade800,
+                    color: isDark ? const Color(0xFF050505) : Colors.green.shade800,
                   ),
                 ),
               ),
@@ -844,7 +844,7 @@ class _AdminFinancesScreenState extends State<AdminFinancesScreen> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFC7FF2E).withValues(alpha: 0.35),
+                            color: const Color(0xFF050505).withValues(alpha: 0.35),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(Icons.event_repeat_rounded, color: Colors.black, size: 20),
@@ -886,8 +886,8 @@ class _AdminFinancesScreenState extends State<AdminFinancesScreen> {
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFC7FF2E),
-                  foregroundColor: Colors.black,
+                  backgroundColor: const Color(0xFF050505),
+                  foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -1077,7 +1077,7 @@ class _AdminFinancesScreenState extends State<AdminFinancesScreen> {
                 Text(
                   '${_formatCurrency(corte.saldoAPagar)} MXN',
                   style: const TextStyle(
-                    color: Color(0xFFC7FF2E),
+                    color: Color(0xFF050505),
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -1098,11 +1098,11 @@ class _AdminFinancesScreenState extends State<AdminFinancesScreen> {
                   ),
                   child: Row(
                     children: const [
-                      Icon(Icons.mark_email_read_rounded, size: 13, color: Color(0xFFC7FF2E)),
+                      Icon(Icons.mark_email_read_rounded, size: 13, color: Color(0xFF050505)),
                       SizedBox(width: 4),
                       Text(
                         'Correo enviado',
-                        style: TextStyle(color: Color(0xFFC7FF2E), fontSize: 10, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: Color(0xFF050505), fontSize: 10, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -1119,7 +1119,7 @@ class _AdminFinancesScreenState extends State<AdminFinancesScreen> {
                 icon: const Icon(Icons.email_outlined, size: 14),
                 label: Text(corte.correoEnviado ? 'Reenviar' : 'Enviar Correo', style: const TextStyle(fontSize: 11)),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.black,
+                  foregroundColor: Colors.white,
                   side: BorderSide(color: Colors.grey.shade400),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   visualDensity: VisualDensity.compact,
@@ -1135,7 +1135,7 @@ class _AdminFinancesScreenState extends State<AdminFinancesScreen> {
                   label: const Text('Pagado', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
-                    foregroundColor: const Color(0xFFC7FF2E),
+                    foregroundColor: const Color(0xFF050505),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     visualDensity: VisualDensity.compact,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -1221,8 +1221,8 @@ class _AdminFinancesScreenState extends State<AdminFinancesScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFC7FF2E),
-              foregroundColor: Colors.black,
+              backgroundColor: const Color(0xFF050505),
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(ctx, true),

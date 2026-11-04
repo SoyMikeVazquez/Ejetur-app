@@ -149,7 +149,7 @@ class _AdminCutoffDatesScreenState extends State<AdminCutoffDatesScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        foregroundColor: Colors.white,
         title: const Text(
           'Fechas de Corte',
           style: TextStyle(fontFamily: 'Google Sans', fontWeight: FontWeight.bold),
@@ -235,7 +235,7 @@ class _AdminCutoffDatesScreenState extends State<AdminCutoffDatesScreen> {
                 ],
                 border: Border(
                   left: BorderSide(
-                    color: index == 0 ? const Color(0xFFC7FF2E) : Colors.black87,
+                    color: index == 0 ? const Color(0xFF050505) : Colors.black87,
                     width: 6,
                   ),
                 ),

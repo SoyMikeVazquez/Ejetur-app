@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  // Paleta de colores principal Taxiseguro
+  // Paleta de colores principal EJETUR
   static const Color appBlack = Color(0xFF050505);
-  static const Color electricGreen = Color(0xFFC7FF2E);
+  static const Color electricGreen = Color(0xFF050505); // Interfaces ahora en negro elegante
   static const Color pureWhite = Color(0xFFFFFFFF);
   static const Color charcoal = Color(0xFF2E2E2E);
   static const Color midGray = Color(0xFF808080);
@@ -17,13 +17,13 @@ class AppTheme {
       brightness: Brightness.light,
       
       // Colores base
-      primaryColor: AppColors.electricGreen,
+      primaryColor: AppColors.appBlack,
       scaffoldBackgroundColor: AppColors.pureWhite,
       
       // Color Scheme
       colorScheme: const ColorScheme.light(
-        primary: AppColors.electricGreen,
-        onPrimary: AppColors.appBlack,
+        primary: AppColors.appBlack,
+        onPrimary: AppColors.pureWhite,
         secondary: AppColors.charcoal,
         onSecondary: AppColors.pureWhite,
         surface: AppColors.pureWhite,
@@ -32,8 +32,6 @@ class AppTheme {
       ),
 
       // Tipografías
-      // Se utiliza Inter como fuente base para el cuerpo de texto,
-      // y Google Sans para títulos y subtítulos.
       textTheme: GoogleFonts.interTextTheme().copyWith(
         displayLarge: const TextStyle(
           fontFamily: 'Google Sans',
@@ -72,7 +70,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.appBlack,
-          foregroundColor: AppColors.electricGreen,
+          foregroundColor: AppColors.pureWhite,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
@@ -86,16 +84,16 @@ class AppTheme {
     );
   }
 
-  // Tema Oscuro Taxiseguro
+  // Tema Oscuro
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      primaryColor: AppColors.electricGreen,
+      primaryColor: AppColors.pureWhite,
       scaffoldBackgroundColor: AppColors.appBlack,
       
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.electricGreen,
+        primary: AppColors.pureWhite,
         onPrimary: AppColors.appBlack,
         secondary: AppColors.charcoal,
         onSecondary: AppColors.pureWhite,
@@ -117,7 +115,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.electricGreen,
+          backgroundColor: AppColors.pureWhite,
           foregroundColor: AppColors.appBlack,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),

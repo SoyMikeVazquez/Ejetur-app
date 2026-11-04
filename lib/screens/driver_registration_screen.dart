@@ -321,8 +321,8 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _handleDriverRegistration,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFC7FF2E), // Electric Green
-                        foregroundColor: Colors.black,
+                        backgroundColor: const Color(0xFF050505), // Modern Black
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),

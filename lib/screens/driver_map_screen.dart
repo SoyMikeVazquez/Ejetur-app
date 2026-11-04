@@ -563,7 +563,7 @@ class _DriverMapScreenState extends State<DriverMapScreen> with WidgetsBindingOb
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: _isDriverActive ? const Color(0xFFC7FF2E).withValues(alpha: 0.25) : Colors.grey[200],
+                          color: _isDriverActive ? const Color(0xFF050505).withValues(alpha: 0.25) : Colors.grey[200],
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -585,7 +585,7 @@ class _DriverMapScreenState extends State<DriverMapScreen> with WidgetsBindingOb
                   ),
                   Switch(
                     value: _isDriverActive,
-                    activeColor: const Color(0xFFC7FF2E),
+                    activeColor: const Color(0xFF050505),
                     activeTrackColor: Colors.black,
                     inactiveThumbColor: Colors.grey[400],
                     inactiveTrackColor: Colors.grey[200],
@@ -834,8 +834,8 @@ class _DriverMapScreenState extends State<DriverMapScreen> with WidgetsBindingOb
                       child: ElevatedButton(
                         onPressed: () => _acceptTrip(trip),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFC7FF2E), // Electric Green
-                          foregroundColor: Colors.black,
+                          backgroundColor: const Color(0xFF050505), // Modern Black
+                          foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                           elevation: 0,
                         ),

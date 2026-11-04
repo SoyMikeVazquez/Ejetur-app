@@ -172,7 +172,7 @@ class _AnimatedAdCardState extends State<AnimatedAdCard>
                             color: Colors.black,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFFC7FF2E),
+                              color: const Color(0xFF050505),
                               width: 1,
                             ),
                             boxShadow: [
@@ -189,7 +189,7 @@ class _AnimatedAdCardState extends State<AnimatedAdCard>
                               Text(
                                 'Más información',
                                 style: TextStyle(
-                                  color: Color(0xFFC7FF2E),
+                                  color: Color(0xFF050505),
                                   fontSize: 11,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 0.2,
@@ -199,7 +199,7 @@ class _AnimatedAdCardState extends State<AnimatedAdCard>
                               Icon(
                                 Icons.arrow_forward_ios_rounded,
                                 size: 9,
-                                color: Color(0xFFC7FF2E),
+                                color: Color(0xFF050505),
                               ),
                             ],
                           ),
