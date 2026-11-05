@@ -153,8 +153,7 @@ class _AdminDriversMonitorScreenState extends State<AdminDriversMonitorScreen> {
                             final name = driver['nombre_completo'] ?? driver['nombre'] ?? 'Conductor';
                             final auto = '${driver['modelo_auto'] ?? 'Auto'} (${driver['placas'] ?? 'S/P'})';
                             final phone = driver['telefono'] ?? 'Sin teléfono';
-                            final estatus = (driver['estatus'] ?? 'inactivo').toString().toLowerCase();
-                            final aprobacion = (driver['Aprobación'] ?? driver['Aprobacion'] ?? driver['aprobacion'] ?? '').toString();
+                                                        final aprobacion = (driver['Aprobación'] ?? driver['Aprobacion'] ?? driver['aprobacion'] ?? '').toString();
 
                             final bool isAct = driver['isActivo'] == true;
                             final bool isPend = aprobacion.toLowerCase() == 'pendiente';

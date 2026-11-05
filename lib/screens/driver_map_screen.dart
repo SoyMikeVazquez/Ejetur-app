@@ -549,7 +549,7 @@ class _DriverMapScreenState extends State<DriverMapScreen> with WidgetsBindingOb
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: const [
                   BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4)),
@@ -585,7 +585,7 @@ class _DriverMapScreenState extends State<DriverMapScreen> with WidgetsBindingOb
                   ),
                   Switch(
                     value: _isDriverActive,
-                    activeColor: const Color(0xFF050505),
+                    activeThumbColor: const Color(0xFF050505),
                     activeTrackColor: Colors.black,
                     inactiveThumbColor: Colors.grey[400],
                     inactiveTrackColor: Colors.grey[200],
@@ -637,7 +637,7 @@ class _DriverMapScreenState extends State<DriverMapScreen> with WidgetsBindingOb
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.95),
+                  color: Colors.white.withValues(alpha: 0.95),
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: const [
                     BoxShadow(color: Colors.black12, blurRadius: 20, offset: Offset(0, 10)),
@@ -691,7 +691,7 @@ class _DriverMapScreenState extends State<DriverMapScreen> with WidgetsBindingOb
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
+                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
                   child: const Icon(Icons.navigation, color: Colors.white, size: 24),
                 ),
                 const SizedBox(width: 12),
@@ -723,7 +723,7 @@ class _DriverMapScreenState extends State<DriverMapScreen> with WidgetsBindingOb
             height: 180,
             margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.95),
+              color: Colors.white.withValues(alpha: 0.95),
               borderRadius: BorderRadius.circular(24),
             ),
             child: const Center(child: CircularProgressIndicator(color: Colors.black)),
@@ -761,7 +761,7 @@ class _DriverMapScreenState extends State<DriverMapScreen> with WidgetsBindingOb
             margin: const EdgeInsets.symmetric(horizontal: 16),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.95),
+              color: Colors.white.withValues(alpha: 0.95),
               borderRadius: BorderRadius.circular(24),
               boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 20, offset: Offset(0, 10))],
             ),

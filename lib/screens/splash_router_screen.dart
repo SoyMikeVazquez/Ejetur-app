@@ -59,14 +59,36 @@ class _SplashRouterScreenState extends State<SplashRouterScreen> {
             userRes['isadmin']?.toString().toLowerCase() == 'true' ||
             userRes['isAdmin']?.toString().toLowerCase() == 'true';
 
-        if (userRes['isConductor'] == true) {
-          isConductor = true;
-          
-          final conductorRes = await Supabase.instance.client
+        final bool flagConductor = userRes['isConductor'] == true || userRes['isConductor']?.toString().toLowerCase() == 'true';
+
+        Map<String, dynamic>? conductorRes;
+        try {
+          conductorRes = await Supabase.instance.client
               .from('conductores')
               .select()
               .eq('user_id', user.id)
               .maybeSingle();
+
+          if (conductorRes == null && user.email != null) {
+            conductorRes = await Supabase.instance.client
+                .from('conductores')
+                .select()
+                .eq('correo', user.email!)
+                .maybeSingle();
+
+            if (conductorRes != null && conductorRes['user_id'] == null) {
+              await Supabase.instance.client
+                  .from('conductores')
+                  .update({'user_id': user.id})
+                  .eq('id', conductorRes['id']);
+            }
+          }
+        } catch (e) {
+          debugPrint("Error consultando conductores: $e");
+        }
+
+        if (flagConductor || conductorRes != null) {
+          isConductor = true;
               
           if (conductorRes == null) {
             print("Warning: isConductor is true but no profile in 'conductores' table.");
@@ -143,11 +165,22 @@ class _SplashRouterScreenState extends State<SplashRouterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: CircularProgressIndicator(
-          color: Colors.black,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/app_icon.png',
+              width: 100,
+              height: 100,
+            ),
+            const SizedBox(height: 24),
+            const CircularProgressIndicator(
+              color: Colors.black,
+            ),
+          ],
         ),
       ),
     );

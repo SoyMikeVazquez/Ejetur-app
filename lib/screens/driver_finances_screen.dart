@@ -21,8 +21,8 @@ class _DriverFinancesScreenState extends State<DriverFinancesScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
 
-  Map<String, List<Trip>> _groupedTrips = {};
-  Map<String, double> _monthlyEarnings = {};
+  final Map<String, List<Trip>> _groupedTrips = {};
+  final Map<String, double> _monthlyEarnings = {};
   double _totalEarnings = 0.0;
   DateTime? _nextCutoffDate;
 

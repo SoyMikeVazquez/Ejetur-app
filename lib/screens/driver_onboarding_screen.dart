@@ -24,6 +24,12 @@ class _DriverOnboardingScreenState extends State<DriverOnboardingScreen> {
   final _placasController = TextEditingController();
   final _anioController = TextEditingController();
 
+  // Fotos del Vehículo
+  File? _autoFile;
+  File? _placasFile;
+  String? _autoUrl;
+  String? _placasUrl;
+
   // Paso 2: Documentos (Imágenes)
   File? _ineFile;
   File? _licenciaFile;
@@ -138,21 +144,33 @@ class _DriverOnboardingScreenState extends State<DriverOnboardingScreen> {
       final fileName = '${userId}_${documentType}_${DateTime.now().millisecondsSinceEpoch}.$fileExtension';
       final storagePath = 'conductores/$userId/$fileName';
       
-      await client.storage
-          .from('general')
-          .uploadBinary(
-            storagePath,
-            fileBytes,
-            fileOptions: const FileOptions(upsert: true),
-          );
-          
-      final publicUrl = client.storage
-          .from('general')
-          .getPublicUrl(storagePath);
+      String publicUrl;
+      try {
+        await client.storage.from('general').uploadBinary(
+          storagePath,
+          fileBytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
+        publicUrl = client.storage.from('general').getPublicUrl(storagePath);
+      } catch (e) {
+        debugPrint('Fallo al subir a general ($e). Intentando conductor-docs...');
+        await client.storage.from('conductor-docs').uploadBinary(
+          storagePath,
+          fileBytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
+        publicUrl = client.storage.from('conductor-docs').getPublicUrl(storagePath);
+      }
           
       setState(() {
         final localFile = File(image.path);
-        if (documentType == 'ine') {
+        if (documentType == 'auto') {
+          _autoFile = localFile;
+          _autoUrl = publicUrl;
+        } else if (documentType == 'placas_doc') {
+          _placasFile = localFile;
+          _placasUrl = publicUrl;
+        } else if (documentType == 'ine') {
           _ineFile = localFile;
           _ineUrl = publicUrl;
         } else if (documentType == 'licencia') {
@@ -225,22 +243,41 @@ class _DriverOnboardingScreenState extends State<DriverOnboardingScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await client.from('conductores').update({
+      final updateData = <String, dynamic>{
         'modelo_auto': _modeloController.text.trim(),
+        'modelo': _modeloController.text.trim(),
+        'marca': _modeloController.text.trim().split(' ').first,
         'color_auto': _colorController.text.trim(),
-        'placas': _placasController.text.trim(),
+        'color': _colorController.text.trim(),
+        'placas': _placasController.text.trim().toUpperCase(),
         'anio_auto': _anioController.text.trim(),
+        'ano': _anioController.text.trim(),
         'ine_url': _ineUrl,
         'licencia_url': _licenciaUrl,
         'seguro_url': _seguroUrl,
         'tarjeta_circulacion_url': _tarjetaUrl,
+        'tarjeta_url': _tarjetaUrl,
         'banco': _bancoController.text.trim(),
         'cuenta_bancaria': _cuentaController.text.trim(),
         'clabe': _clabeController.text.trim(),
         'estatus': widget.isAdminContext ? 'activo' : 'inactivo',
         'Perfi_terminado': true,
         'Aprobacion': widget.isAdminContext ? 'Aprobado' : 'Pendiente',
-      }).eq('user_id', userId);
+      };
+      if (_autoUrl != null) updateData['foto_auto_url'] = _autoUrl;
+      if (_placasUrl != null) updateData['foto_placas_url'] = _placasUrl;
+
+      try {
+        await client.from('conductores').update(updateData).eq('user_id', userId);
+      } catch (e) {
+        final fallbackData = Map<String, dynamic>.from(updateData);
+        fallbackData.remove('foto_auto_url');
+        fallbackData.remove('foto_placas_url');
+        fallbackData.remove('modelo_auto');
+        fallbackData.remove('color_auto');
+        fallbackData.remove('anio_auto');
+        await client.from('conductores').update(fallbackData).eq('user_id', userId);
+      }
 
       if (mounted) {
         if (widget.isAdminContext) {
@@ -375,6 +412,9 @@ class _DriverOnboardingScreenState extends State<DriverOnboardingScreen> {
                       _buildTextField(_anioController, 'Año', 'Ej: 2023', TextInputType.number),
                       _buildTextField(_colorController, 'Color', 'Ej: Blanco'),
                       _buildTextField(_placasController, 'Placas', 'Ej: XYZ-8921'),
+                      const SizedBox(height: 12),
+                      _buildImageUploader('auto', 'Fotografía del Auto', _autoFile != null),
+                      _buildImageUploader('placas_doc', 'Fotografía de las Placas', _placasFile != null),
                     ],
                   ),
                 ),

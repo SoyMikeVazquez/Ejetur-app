@@ -7,6 +7,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'splash_router_screen.dart';
 import 'driver_registration_screen.dart';
 
+enum AuthRoleMode { personal, cliente }
+
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
 
@@ -19,7 +21,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   
-  // Custom User fields for Sign Up
+  // Custom User fields for Sign Up (Cliente)
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
 
@@ -31,6 +33,8 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isSearchingReferral = false;
   String? _referralSearchError;
 
+  // Role selector: Defaults to Personal as requested
+  AuthRoleMode _selectedRoleMode = AuthRoleMode.personal;
   bool _isLogin = true;
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -131,7 +135,7 @@ class _AuthScreenState extends State<AuthScreen> {
         });
       }
     } catch (e) {
-      print('Error cargando conductores para referidos: $e');
+      debugPrint('Error cargando conductores para referidos: $e');
     }
   }
 
@@ -254,8 +258,8 @@ class _AuthScreenState extends State<AuthScreen> {
 
     final referralDigits = _referralPhoneController.text.trim().replaceAll(RegExp(r'\D'), '');
 
-    // Validación obligatoria: Si ingresó un conductor referido, debe ser válido y debe subir su foto de perfil
-    if (!_isLogin && referralDigits.isNotEmpty) {
+    // Validación obligatoria para registro de cliente: Si ingresó un conductor referido, debe ser válido y subir foto
+    if (_selectedRoleMode == AuthRoleMode.cliente && !_isLogin && referralDigits.isNotEmpty) {
       if (_foundReferralDriver == null) {
         _showErrorSnackBar('El número del conductor referido no es válido o no existe. Verifica el número o bórralo si no tienes referido.');
         return;
@@ -279,18 +283,100 @@ class _AuthScreenState extends State<AuthScreen> {
     try {
       if (_isLogin) {
         try {
-          // Sign in
-          print('Iniciando sesión con email: $email');
-          await Supabase.instance.client.auth.signInWithPassword(
+          // Sign in con credenciales
+          final authRes = await Supabase.instance.client.auth.signInWithPassword(
             email: email,
             password: password,
           );
-          print('Sesión iniciada correctamente, procediendo a SplashRouterScreen');
+          
+          final user = authRes.user ?? Supabase.instance.client.auth.currentUser;
+          if (user == null) {
+            throw const AuthException('No se pudo verificar la sesión.');
+          }
+
+          // Validación estricta para el modo PERSONAL
+          if (_selectedRoleMode == AuthRoleMode.personal) {
+            Map<String, dynamic>? userRow;
+            try {
+              userRow = await Supabase.instance.client
+                  .from('users')
+                  .select()
+                  .eq('user_id', user.id)
+                  .maybeSingle();
+            } catch (e) {
+              debugPrint('Error buscando en users: $e');
+            }
+
+            Map<String, dynamic>? conductorRow;
+            try {
+              conductorRow = await Supabase.instance.client
+                  .from('conductores')
+                  .select()
+                  .eq('user_id', user.id)
+                  .maybeSingle();
+
+              if (conductorRow == null && user.email != null) {
+                conductorRow = await Supabase.instance.client
+                    .from('conductores')
+                    .select()
+                    .eq('correo', user.email!)
+                    .maybeSingle();
+
+                if (conductorRow != null && conductorRow['user_id'] == null) {
+                  await Supabase.instance.client
+                      .from('conductores')
+                      .update({'user_id': user.id})
+                      .eq('id', conductorRow['id']);
+                }
+              }
+            } catch (e) {
+              debugPrint('Error buscando en conductores: $e');
+            }
+
+            final bool isAdmin = userRow != null && (
+              userRow['isadmin'] == true ||
+              userRow['isAdmin'] == true ||
+              userRow['is_admin'] == true ||
+              userRow['isadmin']?.toString().toLowerCase() == 'true' ||
+              userRow['isAdmin']?.toString().toLowerCase() == 'true'
+            );
+
+            final bool isConductor = (userRow != null && userRow['isConductor'] == true) || conductorRow != null;
+
+            if (!isAdmin && !isConductor) {
+              // Es una cuenta normal de cliente intentando entrar por Personal
+              await Supabase.instance.client.auth.signOut();
+              throw const AuthException(
+                'Acceso exclusivo para Personal (Conductores y Administradores).\n\nEsta cuenta está registrada como Cliente. Por favor selecciona la pestaña "Cliente" para ingresar.'
+              );
+            }
+
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    isAdmin 
+                        ? '¡Bienvenido Superadministrador!' 
+                        : '¡Bienvenido Conductor!'
+                  ),
+                  backgroundColor: Colors.black,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const SplashRouterScreen()),
+                (route) => false,
+              );
+            }
+            return;
+          }
+
+          // Si el modo es Cliente:
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Sesión iniciada con éxito'),
-                backgroundColor: Colors.green,
+                backgroundColor: Colors.black,
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -347,7 +433,7 @@ class _AuthScreenState extends State<AuthScreen> {
           rethrow;
         }
       } else {
-        // Sign up in auth.users
+        // Sign up como cliente en auth.users
         final res = await Supabase.instance.client.auth.signUp(
           email: email,
           password: password,
@@ -368,7 +454,7 @@ class _AuthScreenState extends State<AuthScreen> {
               );
               photoUrl = Supabase.instance.client.storage.from('general').getPublicUrl(storagePath);
             } catch (uploadError) {
-              print('Error al subir foto de perfil: $uploadError');
+              debugPrint('Error al subir foto de perfil: $uploadError');
             }
           }
 
@@ -399,11 +485,12 @@ class _AuthScreenState extends State<AuthScreen> {
         if (mounted) {
           showDialog(
             context: context,
+            barrierDismissible: false,
             builder: (context) => AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              title: const Text('Registro Exitoso'),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: const Text('¡Registro exitoso!'),
               content: const Text(
-                'Te hemos enviado un correo de confirmación. Por favor, confirma tu cuenta para iniciar sesión.',
+                'Tu cuenta ha sido creada correctamente. Ya puedes iniciar sesión con tu correo y contraseña.',
               ),
               actions: [
                 TextButton(
@@ -412,15 +499,9 @@ class _AuthScreenState extends State<AuthScreen> {
                     setState(() {
                       _isLogin = true;
                       _passwordController.clear();
-                      _nameController.clear();
-                      _phoneController.clear();
-                      _referralPhoneController.clear();
-                      _foundReferralDriver = null;
-                      _referralSearchError = null;
-                      _profileImage = null;
                     });
                   },
-                  child: const Text('Ir al Login', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                  child: const Text('Continuar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
@@ -443,7 +524,7 @@ class _AuthScreenState extends State<AuthScreen> {
       }
     } catch (error) {
       if (mounted) {
-        _showErrorSnackBar('Ocurrió un error inesperado al registrar los datos: $error');
+        _showErrorSnackBar('Ocurrió un error inesperado: $error');
       }
     } finally {
       if (mounted) {
@@ -471,7 +552,7 @@ class _AuthScreenState extends State<AuthScreen> {
       setState(() => _isLoading = true);
       await Supabase.instance.client.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'taxiseguro://reset-callback/',
+        redirectTo: 'ejetur://reset-callback/',
       );
       if (mounted) {
         showDialog(
@@ -491,9 +572,13 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
         );
       }
-    } catch (error) {
+    } on AuthException catch (e) {
       if (mounted) {
-        _showErrorSnackBar('No se pudo enviar el correo de recuperación: $error');
+        _showErrorSnackBar('No se pudo enviar el correo de recuperación: ${e.message}');
+      }
+    } catch (e) {
+      if (mounted) {
+        _showErrorSnackBar('Ocurrió un error inesperado: $e');
       }
     } finally {
       if (mounted) {
@@ -506,15 +591,16 @@ class _AuthScreenState extends State<AuthScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Icon(Icons.error_outline, color: Colors.white),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
             Expanded(child: Text(message)),
           ],
         ),
         backgroundColor: Colors.redAccent[700],
         behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 4),
+        duration: const Duration(seconds: 5),
       ),
     );
   }
@@ -635,10 +721,10 @@ class _AuthScreenState extends State<AuthScreen> {
             ),
             prefixIcon: Container(
               padding: const EdgeInsets.only(left: 18, right: 12),
-              child: Row(
+              child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
+                  Text(
                     '+52',
                     style: TextStyle(
                       fontFamily: 'Google Sans',
@@ -647,25 +733,14 @@ class _AuthScreenState extends State<AuthScreen> {
                       color: Colors.black87,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 1,
+                  SizedBox(width: 8),
+                  SizedBox(
                     height: 20,
-                    color: Colors.black26,
+                    child: VerticalDivider(color: Colors.black26, thickness: 1),
                   ),
                 ],
               ),
             ),
-            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-            suffixIcon: _referralPhoneController.text.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.close, size: 18, color: Colors.black45),
-                    onPressed: () {
-                      _referralPhoneController.clear();
-                      _onReferralPhoneChanged('');
-                    },
-                  )
-                : null,
             filled: true,
             fillColor: const Color(0xFFF3F3F3),
             contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
@@ -675,45 +750,35 @@ class _AuthScreenState extends State<AuthScreen> {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(24),
-              borderSide: isFound && _profileImage == null
-                  ? const BorderSide(color: Colors.orangeAccent, width: 1.5)
-                  : isFound && _profileImage != null
-                      ? const BorderSide(color: Color(0xFF10B981), width: 1.5)
-                      : BorderSide.none,
+              borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(24),
               borderSide: const BorderSide(color: Colors.black, width: 2),
             ),
+            suffixIcon: _isSearchingReferral
+                ? const Padding(
+                    padding: EdgeInsets.all(14),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                    ),
+                  )
+                : (isFound
+                    ? const Icon(Icons.check_circle, color: Color(0xFF10B981))
+                    : (_referralSearchError != null
+                        ? const Icon(Icons.error_outline, color: Colors.orange)
+                        : null)),
           ),
         ),
-
-        // Estado de búsqueda / Conductor encontrado / Error
-        if (_isSearchingReferral) ...[
-          const Padding(
-            padding: EdgeInsets.only(top: 8, left: 4),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black54),
-                ),
-                SizedBox(width: 8),
-                Text(
-                  'Verificando número de conductor...',
-                  style: TextStyle(fontFamily: 'Inter', fontSize: 12, color: Colors.black54),
-                ),
-              ],
-            ),
-          ),
-        ] else if (isFound) ...[
+        if (isFound) ...[
           const SizedBox(height: 8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: const Color(0xFFECFDF5),
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(color: const Color(0xFFA7F3D0)),
             ),
             child: Column(
@@ -721,22 +786,13 @@ class _AuthScreenState extends State<AuthScreen> {
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF10B981),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.check, color: Colors.white, size: 14),
-                    ),
+                    const Icon(Icons.verified, color: Color(0xFF059669), size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        driverPlacas != null && driverPlacas.isNotEmpty
-                            ? 'Conductor: $driverName ($driverPlacas)'
-                            : 'Conductor: $driverName',
+                        'Conductor: ${driverName ?? "Registrado"} ${driverPlacas != null ? "($driverPlacas)" : ""}',
                         style: const TextStyle(
-                          fontFamily: 'Google Sans',
+                          fontFamily: 'Inter',
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
                           color: Color(0xFF065F46),
@@ -815,18 +871,20 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isPersonalMode = _selectedRoleMode == AuthRoleMode.personal;
+
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
+          // Fondo del login
           Positioned.fill(
-            child: Image.network(
-              'https://images.pexels.com/photos/5357606/pexels-photo-5357606.jpeg',
+            child: Image.asset(
+              'assets/images/fondo login.jpg',
               fit: BoxFit.cover,
             ),
           ),
           
-          // Form Content
+          // Formulario flotante
           SafeArea(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -841,7 +899,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   children: [
                     const SizedBox(height: 24),
                     
-                    // Form Container
+                    // Tarjeta Principal
                     Container(
                       margin: const EdgeInsets.symmetric(horizontal: 20),
                       padding: const EdgeInsets.all(24),
@@ -850,8 +908,8 @@ class _AuthScreenState extends State<AuthScreen> {
                         borderRadius: BorderRadius.circular(40),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 20,
+                            color: Colors.black.withValues(alpha: 0.12),
+                            blurRadius: 24,
                             offset: const Offset(0, 10),
                           ),
                         ],
@@ -861,32 +919,163 @@ class _AuthScreenState extends State<AuthScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Logo EJETUR (directo sin círculo ni sombra)
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 20, top: 4),
+                                child: Image.asset(
+                                  'assets/images/app_icon.png',
+                                  height: 64,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
+
+                            // Selector de Modo: Personal vs Cliente
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 20),
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF1F3F5),
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: Row(
+                                children: [
+                                  // Opción Personal (Conductores y Superadministradores)
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedRoleMode = AuthRoleMode.personal;
+                                          _isLogin = true;
+                                        });
+                                      },
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 220),
+                                        padding: const EdgeInsets.symmetric(vertical: 12),
+                                        decoration: BoxDecoration(
+                                          color: isPersonalMode
+                                              ? const Color(0xFF050505)
+                                              : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(26),
+                                          boxShadow: isPersonalMode
+                                              ? [
+                                                  BoxShadow(
+                                                    color: Colors.black.withValues(alpha: 0.2),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 2),
+                                                  )
+                                                ]
+                                              : [],
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.badge_outlined,
+                                              size: 18,
+                                              color: isPersonalMode ? Colors.white : Colors.black54,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              'Personal',
+                                              style: TextStyle(
+                                                fontFamily: 'Google Sans',
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                                color: isPersonalMode ? Colors.white : Colors.black54,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
+                                  // Opción Cliente
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedRoleMode = AuthRoleMode.cliente;
+                                        });
+                                      },
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 220),
+                                        padding: const EdgeInsets.symmetric(vertical: 12),
+                                        decoration: BoxDecoration(
+                                          color: !isPersonalMode
+                                              ? const Color(0xFF050505)
+                                              : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(26),
+                                          boxShadow: !isPersonalMode
+                                              ? [
+                                                  BoxShadow(
+                                                    color: Colors.black.withValues(alpha: 0.2),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 2),
+                                                  )
+                                                ]
+                                              : [],
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.person_outline_rounded,
+                                              size: 18,
+                                              color: !isPersonalMode ? Colors.white : Colors.black54,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              'Cliente',
+                                              style: TextStyle(
+                                                fontFamily: 'Google Sans',
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                                color: !isPersonalMode ? Colors.white : Colors.black54,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // Título dinámico
                             Text(
-                              _isLogin ? 'Bienvenido de nuevo' : 'Crea tu cuenta',
+                              isPersonalMode
+                                  ? 'Acceso Personal'
+                                  : (_isLogin ? 'Acceso Clientes' : 'Crea tu cuenta'),
                               style: const TextStyle(
                                 fontFamily: 'Google Sans',
-                                fontSize: 28,
+                                fontSize: 26,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: -0.5,
                                 height: 1.1,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 6),
                             Text(
-                              _isLogin 
-                                  ? 'Ingresa para continuar tu viaje.' 
-                                  : 'Regístrate para usar Taxiseguro.',
+                              isPersonalMode
+                                  ? 'Conductores y Superadministradores autorizados.'
+                                  : (_isLogin 
+                                      ? 'Ingresa para solicitar y contratar servicios.' 
+                                      : 'Regístrate para viajar con EJETUR.'),
                               style: const TextStyle(
                                 fontFamily: 'Inter',
-                                fontSize: 14,
+                                fontSize: 13,
                                 color: Colors.black54,
                               ),
                             ),
                             
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 22),
                             
-                            // Extra fields for Sign Up
-                            if (!_isLogin) ...[
+                            // Campos extra para Registro de Cliente (si no es Personal y no es Login)
+                            if (!isPersonalMode && !_isLogin) ...[
                               // Selector de Foto de Perfil
                               Center(
                                 child: GestureDetector(
@@ -927,12 +1116,12 @@ class _AuthScreenState extends State<AuthScreen> {
                                           padding: const EdgeInsets.all(6),
                                           decoration: const BoxDecoration(
                                             shape: BoxShape.circle,
-                                            color: Color(0xFF050505), // Modern Black
+                                            color: Color(0xFF050505),
                                           ),
                                           child: const Icon(
                                             Icons.camera_alt,
                                             size: 16,
-                                            color: Colors.black,
+                                            color: Colors.white,
                                           ),
                                         ),
                                       ),
@@ -971,11 +1160,11 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                             ],
 
-                            // Email
+                            // Correo Electrónico
                             _buildTextField(
                               controller: _emailController,
                               label: 'Correo electrónico',
-                              hint: 'ejemplo@taxiseguro.com',
+                              hint: isPersonalMode ? 'personal@ejetur.com' : 'cliente@ejemplo.com',
                               keyboardType: TextInputType.emailAddress,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -989,7 +1178,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               },
                             ),
 
-                            // Password
+                            // Contraseña
                             _buildTextField(
                               controller: _passwordController,
                               label: 'Contraseña',
@@ -1017,11 +1206,12 @@ class _AuthScreenState extends State<AuthScreen> {
                               },
                             ),
 
-                            // Campo de teléfono de conductor que te refirió (+52) hasta abajo
-                            if (!_isLogin) ...[
+                            // Campo de referido (solo en registro de clientes)
+                            if (!isPersonalMode && !_isLogin) ...[
                               _buildReferralPhoneField(),
                             ],
                             
+                            // Olvidaste tu contraseña
                             if (_isLogin) ...[
                               Align(
                                 alignment: Alignment.centerRight,
@@ -1047,14 +1237,14 @@ class _AuthScreenState extends State<AuthScreen> {
                               const SizedBox(height: 16),
                             ],
 
-                            // Submit Button
+                            // Botón Principal
                             SizedBox(
                               width: double.infinity,
                               height: 56,
                               child: ElevatedButton(
                                 onPressed: _isLoading ? null : _handleSubmit,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF050505), // Modern Black
+                                  backgroundColor: const Color(0xFF050505),
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30),
@@ -1067,14 +1257,16 @@ class _AuthScreenState extends State<AuthScreen> {
                                         height: 24,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2.5,
-                                          color: Colors.black,
+                                          color: Colors.white,
                                         ),
                                       )
                                     : Text(
-                                        _isLogin ? 'Iniciar sesión' : 'Registrarse',
+                                        isPersonalMode
+                                            ? 'Iniciar sesión como Personal'
+                                            : (_isLogin ? 'Iniciar sesión' : 'Registrarse'),
                                         style: const TextStyle(
                                           fontFamily: 'Google Sans',
-                                          fontSize: 18,
+                                          fontSize: 17,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -1083,48 +1275,73 @@ class _AuthScreenState extends State<AuthScreen> {
 
                             const SizedBox(height: 16),
 
-                            // Toggle Login/Register
-                            Center(
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _isLogin = !_isLogin;
-                                    _formKey.currentState?.reset();
-                                    _emailController.clear();
-                                    _passwordController.clear();
-                                    _nameController.clear();
-                                    _phoneController.clear();
-                                    _profileImage = null;
-                                    _referralPhoneController.clear();
-                                    _foundReferralDriver = null;
-                                    _referralSearchError = null;
-                                  });
-                                },
-                                child: RichText(
-                                  text: TextSpan(
-                                    text: _isLogin 
-                                        ? '¿No tienes una cuenta? ' 
-                                        : '¿Ya tienes una cuenta? ',
-                                    style: const TextStyle(
-                                      fontFamily: 'Inter', 
-                                      color: Colors.black54, 
-                                      fontSize: 14
+                            // Acciones secundarias según el modo
+                            if (isPersonalMode) ...[
+                              // Enlace directo para registro de nuevo conductor
+                              Center(
+                                child: TextButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(builder: (_) => const DriverRegistrationScreen()),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.drive_eta_rounded, size: 18, color: Colors.black87),
+                                  label: const Text(
+                                    '¿Quieres ser conductor? Regístrate aquí',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      decoration: TextDecoration.underline,
                                     ),
-                                    children: [
-                                      TextSpan(
-                                        text: _isLogin ? 'Regístrate' : 'Inicia sesión',
-                                        style: const TextStyle(
-                                          fontFamily: 'Inter',
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                          decoration: TextDecoration.underline,
-                                        ),
-                                      ),
-                                    ],
                                   ),
                                 ),
                               ),
-                            ),
+                            ] else ...[
+                              // Toggle Login / Registro en modo Cliente
+                              Center(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _isLogin = !_isLogin;
+                                      _formKey.currentState?.reset();
+                                      _emailController.clear();
+                                      _passwordController.clear();
+                                      _nameController.clear();
+                                      _phoneController.clear();
+                                      _profileImage = null;
+                                      _referralPhoneController.clear();
+                                      _foundReferralDriver = null;
+                                      _referralSearchError = null;
+                                    });
+                                  },
+                                  child: RichText(
+                                    text: TextSpan(
+                                      text: _isLogin 
+                                          ? '¿No tienes una cuenta de cliente? ' 
+                                          : '¿Ya tienes una cuenta de cliente? ',
+                                      style: const TextStyle(
+                                        fontFamily: 'Inter', 
+                                        color: Colors.black54, 
+                                        fontSize: 14
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: _isLogin ? 'Regístrate' : 'Inicia sesión',
+                                          style: const TextStyle(
+                                            fontFamily: 'Inter',
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -1132,7 +1349,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     
                     const SizedBox(height: 20),
                     
-                    // Driver Registration Link
+                    // Botón inferior flotante de Conductor (Accesible en cualquier momento)
                     GestureDetector(
                       onTap: () {
                         Navigator.of(context).push(
@@ -1143,17 +1360,25 @@ class _AuthScreenState extends State<AuthScreen> {
                         margin: const EdgeInsets.only(bottom: 24),
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.5),
+                          color: Colors.black.withValues(alpha: 0.55),
                           borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.white24, width: 0.8),
                         ),
-                        child: const Text(
-                          '¿Quieres ser conductor? Regístrate aquí',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.directions_car_filled_outlined, size: 16, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text(
+                              'Únete como conductor de EJETUR',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ).animate().fade(duration: 500.ms, delay: 400.ms).slideY(begin: 0.2, end: 0, duration: 500.ms, curve: Curves.easeOutQuad, delay: 400.ms),

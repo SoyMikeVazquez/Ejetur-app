@@ -1,7 +1,4 @@
 import 'package:fl_chart/fl_chart.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'dart:convert';
-import 'driver_shift_service.dart';
 
 class DashboardFinancialData {
   final double totalRevenue;

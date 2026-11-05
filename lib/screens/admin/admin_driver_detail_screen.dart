@@ -262,13 +262,6 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
     return '${d.day} $monthStr ${d.year} • $hourStr:$minStr hrs';
   }
 
-  String _formatTimeOnly(DateTime d) {
-    final local = d.toLocal();
-    final hourStr = local.hour.toString().padLeft(2, '0');
-    final minStr = local.minute.toString().padLeft(2, '0');
-    return '$hourStr:$minStr hrs';
-  }
-
   void _showShiftHistoryDialog(BuildContext context) {
     Navigator.push(
       context,
@@ -770,7 +763,13 @@ class _AdminDriverDetailScreenState extends State<AdminDriverDetailScreen> with 
                 style: TextStyle(color: Colors.grey, fontSize: 12),
               ),
               const SizedBox(height: 16),
-              _buildDocumentCard('Identificación Oficial (INE)', driver['ine_url']),
+              _buildDocumentCard('Fotografía del Vehículo', driver['foto_auto_url']),
+              const SizedBox(height: 10),
+              _buildDocumentCard('Fotografía de las Placas', driver['foto_placas_url']),
+              const SizedBox(height: 10),
+              _buildDocumentCard('Identificación Oficial (INE Frente)', driver['ine_frente_url'] ?? driver['ine_url']),
+              const SizedBox(height: 10),
+              _buildDocumentCard('Identificación Oficial (INE Reverso)', driver['ine_reverso_url']),
               const SizedBox(height: 10),
               _buildDocumentCard('Licencia de Conducir', driver['licencia_url']),
               const SizedBox(height: 10),

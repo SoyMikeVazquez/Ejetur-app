@@ -384,7 +384,7 @@ class _AdminHeatmapScreenState extends State<AdminHeatmapScreen> {
                   subtitle: Text('${z['radius_km']} km | +${z['percentage_increase']}%', style: const TextStyle(color: Colors.grey)),
                   trailing: Switch(
                     value: z['is_active'] == true,
-                    activeColor: const Color(0xFF050505),
+                    activeThumbColor: const Color(0xFF050505),
                     onChanged: (val) async {
                       await _adminService.toggleDynamicPricingZone(z['id'], val);
                       _loadHeatmap();

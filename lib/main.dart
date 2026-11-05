@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'env/env.dart';
-import 'screens/home_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/splash_router_screen.dart';
 import 'screens/update_password_screen.dart';

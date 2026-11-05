@@ -46,7 +46,7 @@ class _MapWidgetState extends State<MapWidget> {
   List<LatLng> _routePoints = [];
   StreamSubscription<LatLng>? _locationSubscription;
   
-  List<SimulatedCar> _simulatedCars = [];
+  final List<SimulatedCar> _simulatedCars = [];
   Timer? _simulationTimer;
   final Random _random = Random();
   static const String _mapboxToken = Env.mapboxApiKey;
@@ -250,8 +250,8 @@ class _MapWidgetState extends State<MapWidget> {
             maxZoom: 18.0,
             minZoom: 2.0,
             onPositionChanged: (position, hasGesture) {
-              if (widget.onCameraMove != null && position.center != null) {
-                widget.onCameraMove!(position.center!);
+              if (widget.onCameraMove != null) {
+                widget.onCameraMove!(position.center);
               }
             },
           ),

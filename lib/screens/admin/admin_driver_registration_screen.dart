@@ -73,8 +73,8 @@ class _AdminDriverRegistrationScreenState extends State<AdminDriverRegistrationS
         final driverData = {
           'id': userId,
           'user_id': userId,
-          'nombre': name.isNotEmpty ? name : 'Conductor Taxiseguro',
-          'nombre_completo': name.isNotEmpty ? name : 'Conductor Taxiseguro',
+          'nombre': name.isNotEmpty ? name : 'Conductor EJETUR',
+          'nombre_completo': name.isNotEmpty ? name : 'Conductor EJETUR',
           'correo': email,
           'telefono': phone.isNotEmpty ? phone : '8110002233',
           'estatus': 'activo',
@@ -241,7 +241,7 @@ class _AdminDriverRegistrationScreenState extends State<AdminDriverRegistrationS
                   _buildTextField(
                     controller: _emailController,
                     label: 'Correo electrónico',
-                    hint: 'ejemplo@taxiseguro.com',
+                    hint: 'conductor@ejetur.com',
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) return 'Por favor ingresa un correo';

@@ -527,7 +527,7 @@ class TripService {
 
       await _client.from('trips').update({
         'status': 'cancelled',
-        if (cancelReason != null) 'cancel_reason': cancelReason,
+        'cancel_reason': ?cancelReason,
         if (finalName != null && finalName.isNotEmpty) 'name_driver': finalName,
         if (finalPhoto != null && finalPhoto.isNotEmpty) 'photo_driver': finalPhoto,
       }).eq('id', tripId);

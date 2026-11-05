@@ -1213,7 +1213,7 @@ class _ActiveTripScreenState extends State<ActiveTripScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                            color: _remainingSeconds < 60 ? Colors.red.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                            color: _remainingSeconds < 60 ? Colors.red.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(color: _remainingSeconds < 60 ? Colors.red : Colors.orange),
                           ),

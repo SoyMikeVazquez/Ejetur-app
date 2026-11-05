@@ -22,16 +22,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool _isLoading = false;
   bool _isSaving = false;
-  String _selectedPaymentMethod = 'Efectivo';
+  // final String _selectedPaymentMethod = 'Efectivo';
   String? _profileImageUrl;
   double _userRating = 5.0;
 
   // Lista simulada de métodos de pago guardados
+  /*
   final List<Map<String, String>> _paymentMethods = [
     {'type': 'cash', 'title': 'Efectivo', 'subtitle': 'Pagar en efectivo al finalizar'},
     {'type': 'card', 'title': 'Visa **** 4242', 'subtitle': 'Vence 12/28'},
     {'type': 'card', 'title': 'Mastercard **** 8819', 'subtitle': 'Vence 05/27'},
   ];
+*/
 
   @override
   void initState() {
@@ -202,7 +204,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  void _showAddPaymentMethodModal() {
+  /* void _showAddPaymentMethodModal() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -299,7 +301,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       },
     );
-  }
+  } */
 
   @override
   Widget build(BuildContext context) {

@@ -29,9 +29,7 @@ class _AdminTripsHistoryScreenState extends State<AdminTripsHistoryScreen> {
   Future<void> _fetchTrips() async {
     setState(() => _isLoading = true);
     try {
-      final startOfDay = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
-      final endOfDay = startOfDay.add(const Duration(days: 1));
-
+            
       // Obtenemos los viajes con join a la tabla de conductores (si driver_id está en conductores)
       // Nota: asumo que la relación en Supabase permite 'driver:conductores(nombre, apellidos)'
       // Obtenemos los últimos viajes y los filtramos localmente para evitar
@@ -172,7 +170,7 @@ class _AdminTripsHistoryScreenState extends State<AdminTripsHistoryScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: Colors.grey.shade200),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 4, offset: const Offset(0, 2))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -447,7 +445,7 @@ class _AdminTripsHistoryScreenState extends State<AdminTripsHistoryScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8)],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 8)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -153,7 +153,7 @@ class AdminService {
       final List<dynamic> trips = (tripsRes as List<dynamic>?) ?? [];
       
       DateTime? nextCutoff;
-      if (cutoffRes != null && (cutoffRes as List).isNotEmpty) {
+      if ((cutoffRes as List).isNotEmpty) {
         final lastCutoffStr = cutoffRes[0]['fecha_corte'].toString();
         nextCutoff = DateTime.tryParse(lastCutoffStr);
       } else {
@@ -753,7 +753,7 @@ class AdminService {
       await _supabase.from('tarifas_mapas_calor_perse').update({'Porcentaje': porcentaje}).eq('id', id);
     } catch (e) {
       print('Error al actualizar tarifa de densidad: $e');
-      throw e;
+      rethrow;
     }
   }
 

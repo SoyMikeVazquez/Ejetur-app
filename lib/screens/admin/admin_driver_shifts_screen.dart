@@ -268,10 +268,6 @@ class _AdminDriverShiftsScreenState extends State<AdminDriverShiftsScreen> {
   }
 
   Future<void> _pickDate(BuildContext context) async {
-    final initialDate = widget.shiftStats.daysHistory.isNotEmpty 
-        ? DateTime.parse(widget.shiftStats.daysHistory.first.fecha) 
-        : DateTime.now();
-
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
